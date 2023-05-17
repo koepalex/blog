@@ -1,3 +1,18 @@
-baseURL = 'http://example.org/'
-languageCode = 'en-us'
-title = 'My New Hugo Site'
+baseURL = 'https://koepalex.github.io/blog/'
+languageCode = 'de-de'
+title = 'Blog von Alexander Köpke'
+theme = 'm10c'
+
+[params]
+    author = 'Alexander Köpke'
+    description = 'Technischer Artikel, das Universum und der ganze Rest' 
+    
+    [[params.social]]
+        icon = "github"
+        name = "GitHub"
+        url = "https://github.com/koepalex"
+
+    [[params.social]]
+        icon = "twitter"
+        name = "Twitter"
+        url = "https://twitter.com/koepalex"
