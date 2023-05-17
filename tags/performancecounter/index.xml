@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>performancecounter on Blog von Alexander Köpke</title><link>https://koepalex.github.io/blog/tags/performancecounter/</link><description>Recent content in performancecounter on Blog von Alexander Köpke</description><generator>Hugo -- gohugo.io</generator><language>de-de</language><lastBuildDate>Sun, 14 Oct 2012 00:00:00 +0000</lastBuildDate><atom:link href="https://koepalex.github.io/blog/tags/performancecounter/index.xml" rel="self" type="application/rss+xml"/><item><title>Ermitteln des PID (Processidentifier) des Vaterprozesses</title><link>https://koepalex.github.io/blog/blog/2012-10-14-ermitteln-des-pid-processidentifier-des-vaterprozesses/</link><pubDate>Sun, 14 Oct 2012 00:00:00 +0000</pubDate><guid>https://koepalex.github.io/blog/blog/2012-10-14-ermitteln-des-pid-processidentifier-des-vaterprozesses/</guid><description>In manchen Fällen ist es notwendig heraus zu finden, welches der Vaterprozess eines Prozesses ist. Dafür gibt es im Allgemeinen drei verschiedene Lösungen im Windows .NET Umfeld.
+Die häufigste Lösung ist die Verwendung von Performancecountern.
+var process = FindProcess();
+using (var pC = new PerformanceCounter(
+&amp;ldquo;Process&amp;rdquo;,
+&amp;ldquo;Creating Process ID&amp;rdquo;,
+string.Format(&amp;quot;{0}#{1}&amp;quot;, process.ProcessName, 1), process.MachineName))
+{
+int pid = (int)pC.NextValue();
+Console.WriteLine(&amp;ldquo;parent pid = {0}&amp;rdquo;, pid);
+}
+Die Verwendung von Performancecountern im Allgemeinen kann zwei mögliche Nachteile haben:</description></item></channel></rss>
