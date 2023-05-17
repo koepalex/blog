@@ -16,3 +16,10 @@ theme = 'm10c'
         icon = "twitter"
         name = "Twitter"
         url = "https://twitter.com/koepalex"
+
+    [params.style]
+        darkestColor = "#315659"
+        darkColor = "#253031"
+        lightColor = "#96a879"
+        lightestColor = "#fff"
+        primaryColor = "#dad865"
