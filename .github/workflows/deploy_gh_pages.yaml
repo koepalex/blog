@@ -34,7 +34,7 @@ jobs:
           node-version: latest
 
       - name: Build Search Index
-        run: npx pagefind --site="public" --output-subdirs="static/_pagefind"
+        run: npx pagefind --site="public" --output-subdir="static/_pagefind"
         env:
           npm_config_yes: rue
 
