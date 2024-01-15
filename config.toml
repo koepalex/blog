@@ -1,25 +1,47 @@
 baseURL = 'https://koepalex.github.io/blog/'
 languageCode = 'de-de'
-title = 'Blog von Alexander Köpke'
-theme = 'm10c'
+#title = 'Blog von Alexander Köpke'
+theme = 'hugo-theme-cleanwhite'
+
+[outputs]
+home = ["HTML", "RSS"]
+
 
 [params]
     author = 'Alexander Köpke'
-    description = 'Technischer Artikel, das Universum und der ganze Rest' 
-    
-    [[params.social]]
-        icon = "github"
-        name = "GitHub"
-        url = "https://github.com/koepalex"
+    description = 'Technischer Artikel, das Universum und der ganze Rest'
 
-    [[params.social]]
-        icon = "twitter"
-        name = "Twitter"
-        url = "https://twitter.com/koepalex"
+    header_image = "koepalex.logo.gif"
 
+    reward = false 
+    friends = false
+    bookmarks = false
+    about_me = true
+    algolia_search = false
+    sidebar_about_description = "Software Developer, Open Source Enthusiast and Life Adventurer"
+    sidebar_avatar = "avatar.jpg"  
+    image_404 = "404.jpg"
+    title_404 = "there be dragons 🐉"
+
+    [params.social]
+        rss = true
+        email = "this-is@alexander-koepke.de"
+        github = "https://github.com/koepalex"
+        twitter = "https://twitter.com/koepalex"
+        linkedin = "https://www.linkedin.com/in/alexander-köpke-3222a21b7/"
+        stackoverflow = "https://stackoverflow.com/users/9474615/koepalex"
+        mastodon = "@koepalex@dotnet.social"
+        
     [params.style]
         darkestColor = "#315659"
         darkColor = "#253031"
         lightColor = "#96a879"
         lightestColor = "#fff"
         primaryColor = "#dad865"
+    
+    [markup]
+        [markup.tableOfContents]
+            endLevel = 2
+            startLevel = 1
+        [markup.highlight]
+            style = "dracula"
