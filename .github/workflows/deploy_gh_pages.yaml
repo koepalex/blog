@@ -28,6 +28,16 @@ jobs:
       - name: Build
         run: hugo --minify
 
+      - name: Setup Node.JS
+        uses: actions/setup-node@v4
+        with:
+          node-version: latest
+
+      - name: Build Search Index
+        run: npx pagefind --site="public" --output-path="static/_pagefind"
+        env:
+          npm_config_yes: rue
+
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main'
