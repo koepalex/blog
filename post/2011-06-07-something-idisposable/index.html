@@ -1,0 +1,243 @@
+<!doctype html><html lang=de-de><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1"><meta property="og:site_name" content><meta property="og:type" content="article"><meta property="og:image" content="https://koepalex.github.io/blog//koepalex.logo.gif"><meta property="twitter:image" content="https://koepalex.github.io/blog//koepalex.logo.gif"><meta name=title content="Einiges über IDisposable"><meta property="og:title" content="Einiges über IDisposable"><meta property="twitter:title" content="Einiges über IDisposable"><meta name=description content="Technischer Artikel, das Universum und der ganze Rest"><meta property="og:description" content="Technischer Artikel, das Universum und der ganze Rest"><meta property="twitter:description" content="Technischer Artikel, das Universum und der ganze Rest"><meta property="twitter:card" content="summary"><meta name=keyword content><link rel="shortcut icon" href=/blog/img/favicon.ico><title>Einiges über IDisposable | </title><link rel=canonical href=/blog/post/2011-06-07-something-idisposable/><link rel=stylesheet href=/blog/css/bootstrap.min.css><link rel=stylesheet href=/blog/css/hugo-theme-cleanwhite.min.css><link rel=stylesheet href=/blog/css/zanshang.css><link rel=stylesheet href=/blog/css/font-awesome.all.min.css><script src=/blog/js/jquery.min.js></script><script src=/blog/js/bootstrap.min.js></script><script src=/blog/js/hux-blog.min.js></script><script src=/blog/js/lazysizes.min.js></script></head><nav class="navbar navbar-default navbar-custom navbar-fixed-top"><div class=container-fluid><div class="navbar-header page-scroll"><button type=button class=navbar-toggle>
+<span class=sr-only>Toggle navigation</span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+</button>
+<a class=navbar-brand href=/></a></div><div id=huxblog_navbar><div class=navbar-collapse><ul class="nav navbar-nav navbar-right"><li><a href=/blog>All Posts</a></li><li><a href=/blog/categories/allgemein/>allgemein</a></li><li><a href=/blog/categories/c-net/>c-net</a></li><li><a href=/blog/categories/java/>java</a></li><li><a href=/blog/categories/macos/>macos</a></li><li><a href=/blog/categories/ubuntu/>ubuntu</a></li><li><a href=/blog/categories/zfs/>zfs</a></li><li><a href=/blog/search><i class="fa fa-search"></i></a></li></ul></div></div></div></nav><script>var $body=document.body,$toggle=document.querySelector(".navbar-toggle"),$navbar=document.querySelector("#huxblog_navbar"),$collapse=document.querySelector(".navbar-collapse");$toggle.addEventListener("click",handleMagic);function handleMagic(){$navbar.className.indexOf("in")>0?($navbar.className=" ",setTimeout(function(){$navbar.className.indexOf("in")<0&&($collapse.style.height="0px")},400)):($collapse.style.height="auto",$navbar.className+=" in")}</script><style type=text/css>header.intro-header{background-image:url(/blog/koepalex.logo.gif)}</style><header class=intro-header><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><div class=post-heading><div class=tags><a class=tag href=/tags/net title=net>net
+</a><a class=tag href=/tags/bitmap title=bitmap>bitmap
+</a><a class=tag href=/tags/c title=c>c
+</a><a class=tag href=/tags/idisposable title=idisposable>idisposable</a></div><h1>Einiges über IDisposable</h1><h2 class=subheading></h2><span class=meta>Posted by
+on
+Tuesday, June 7, 2011</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
+col-md-10 col-md-offset-1
+post-container"><p>Das Standard Interface IDisposable welches  zur &ldquo;Freigabe&rdquo; von Ressourcen in .Net dient ist recht Einfach:</p><p>public interface IDisposable
+{
+void Dispose();
+}</p><p>Nur dieses Interface zu Implementieren reicht in vielen Fällen nicht aus. Es gibt z.B. einen FxCop Fehler <a href="http://msdn.microsoft.com/en-us/library/ms244737(v=vs.80).aspx">Implement IDisposable correctly</a>, dieser erscheint u.a. bei non-sealed Klassen welche keinen Medthode mit der Signatur protected virtual Dispose(bool) besitzen.  IDisposable zu Implementieren wird nötig wenn man:</p><ol><li>unmanged (native) Ressourcen lädt um diese wieder freizugeben</li><li>managed Felder besitzt, welche wiederum IDisposable implementieren</li></ol><p>Im folgenden Beispiel zeigt eine (nach FxCop komplette Implementierung) einer Basis-Klasse  und einer Kind-Klasse:</p><p>public class ManagedBasisClassI : IDisposable
+{</p><pre><code>~ManagedBasisClassI()
+{
+	Dispose(false);
+}
+
+public void Dispose()
+{
+	Dispose(true);
+}
+
+protected virtual void Dispose(bool disposing)
+{
+	if (disposing)
+	{
+		//clean managed ressources
+		GC.SuppressFinalize(this);
+	}
+	//clean unmanaged ressources
+}
+</code></pre><p>}</p><p>public class ManagedChildClass : ManagedBasisClassI
+{
+protected override void Dispose(bool disposing)
+{
+try
+{
+if (disposing)
+{
+//clean managed ressources
+}
+//clean unmanaged ressources
+}
+finally
+{
+base.Dispose(disposing);
+}
+}
+}</p><p>Man darf jetzt nicht auf die Idee kommen, dass IDisposable im .Net Framework dazu dient den Lebenszyklus von Objekten zu steuern. Objekte existieren mindestens so lange, wie eine Referenz auf sie besteht (Ausnahme: WeakReference). Bitte das &ldquo;mindestens&rdquo; beachten, denn wann ein Objekt aus dem Speicher verschwindet, auf das keine Referenz mehr existiert entscheidet nur der Garbage Collector. Zugriffe auf Objekte die noch existieren, aber bei denen Dispose bereits aufgerufen wurde, enden oft in Exceptions. Die Klasse Bitmap wirft in solchen Fällen eine  ArgumentException “Ungültiger Parameter“.  Eigene Klassen sollte man daher eine Weitere public Property erhalten, durch welche man Abfragen kann ob das Objekt bereits Disposed wurde oder gerade Disposed wird. In solchen Fällen, darf man auf das Objekt nicht mehr Zugreifen, sondern muss es Neuanlegen.</p><p>public class ManagedBasisClassII : IDisposable
+{
+~ManagedBasisClassII()
+{
+Dispose(false);
+}</p><pre><code>public void Dispose()
+{
+	Dispose(true);
+}
+
+protected virtual void Dispose(bool disposing)
+{
+	**if (Disposing) throw new ObjectDisposedException(this.ToString());
+	Disposing = true;**
+	if (disposing)
+	{
+		//clean managed ressources
+		GC.SuppressFinalize(this);
+	}
+	//clean unmanaged ressources
+}
+
+**public bool Disposing { get; private set; }**
+</code></pre><p>}</p><p>Diese Lösung trägt für eigene Objekte sehr gut. Problematisch wird es bei Objekten von Klassen des .Net Framework selbst. Der nächste Quelltext stellt eine kleines Dummy Programm dar, indem 2 Clients Zugriff auf ein und das selbe <a href=http://msdn.microsoft.com/en-us/library/system.drawing.image.aspx>Bitmap</a> Objekt möchten. Client1 ruft Dispose am Bitmap auf nach Verwendung (was auch sehr gut ist). Client2 bekommt beim Versuch das Bitmap aus einem Pool zu laden, die Referenz auf das alte Objekt, beim Zugriff auf eine der Methoden des Objektes kommt es zum Absturz des Programmes.</p><p>class Program
+{
+static void Main(string[] args)
+{
+PicturePool pool = new PicturePool();
+ClientI client1 = new ClientI(pool);
+client1.Run();
+ClientII client2 = new ClientII(pool);
+client2.Run();
+}
+}</p><p>public class ClientI
+{
+private PicturePool m_Pool;
+public ClientI(PicturePool pool)
+{
+if(pool == null) throw new ArgumentNullException(&ldquo;pool&rdquo;);
+m_Pool = pool;
+}</p><pre><code>public void Run()
+{
+	Bitmap pic = m\_Pool\[@&quot;D:\\tmp\\bild.jpg&quot;\];
+	Console.WriteLine(String.Format(&quot;Height:{0}&quot;, pic.Height));
+	Console.WriteLine(String.Format(&quot;Width:{0}&quot;, pic.Width));
+	Console.WriteLine(String.Format(&quot;Pixelformat:{0}&quot;, pic.PixelFormat));
+	pic.Dispose();
+}
+</code></pre><p>}</p><p>public class ClientII
+{
+private PicturePool m_Pool;
+public ClientII(PicturePool pool)
+{
+if(pool == null) throw new ArgumentNullException(&ldquo;pool&rdquo;);
+m_Pool = pool;
+}
+public void Run()
+{
+Bitmap pic = m_Pool[@&ldquo;D:\tmp\bild.jpg&rdquo;];
+<strong><em>//ArgumentException"UngültigerParameter"</em></strong>
+Image thumbnail = pic.GetThumbnailImage(200, 200, null, IntPtr.Zero);
+thumbnail.Save(@&ldquo;D:\tmp\bild_thumbnail.jpg&rdquo;); pic.Dispose();
+}
+}</p><p>public class PicturePool
+{
+private Dictionary&lt;string, WeakReference> m_Pool;</p><pre><code>public PicturePool()
+{
+	m\_Pool = new Dictionary&lt;string, WeakReference&gt;();
+}
+
+public Bitmap this\[string path\]
+{
+	get
+	{
+		if(String.IsNullOrEmpty(path)) throw new ArgumentNullException(&quot;path&quot;);
+		return GetPicture(path);
+	}
+}
+
+private Bitmap GetPicture(string path)
+{
+	if(!m\_Pool.ContainsKey(path) || !m\_Pool\[path\].IsAlive || m\_Pool\[path\].Target == null)
+	{
+		m\_Pool\[path\] = new WeakReference(new Bitmap(path));
+	}
+	**_//WeakReference.IsAlvie kann true sein aber das Target bereits Disposed
+	//was kann man tun?_**
+	Return m\_Pool\[path\].Target as Bitmap;
+}
+</code></pre><p>}</p><p>Da es nicht Möglich ist zu ermitteln ob das Bitmap-Objekt bereits Disposed ist kommt es zu dem oberen Absturz. Eine einfache Lösung  ist ein Wrapper um das Bitmap Objekt (eine Ableitung kann es nicht sein, da die Klasse Bitmap Sealed ist). Der PicturePool gibt nur noch Referenzen auf einen BitmapWrapper herraus und fragt am BitmapWrapper ob er Disposed ist, wenn ja muss der Wrapper für dieses Bitmap neu geladen werden.</p><p>class Program
+{
+static void Main(string[] args)
+{
+PicturePool2 pool = new PicturePool2();
+ClientIa client1 = new ClientIa(pool);
+client1.Run();
+ClientIIa client2 = new ClientIIa(pool);
+client2.Run();
+}
+}</p><p>public class ClientIa
+{
+private PicturePool2 m_Pool;
+public ClientIa(PicturePool2 pool)
+{
+if(pool == null) throw new ArgumentNullException(&ldquo;pool&rdquo;);
+m_Pool = pool;
+}</p><pre><code>public void Run()
+{
+	**BitmapWrapper wrapper** = m\_Pool\[@&quot;D:\\tmp\\bild.jpg&quot;\];
+	Console.WriteLine(String.Format(&quot;Height:{0}&quot;, **wrapper.Bitmap**.Height));
+	Console.WriteLine(String.Format(&quot;Width:{0}&quot;, **wrapper.Bitmap**.Width));
+	Console.WriteLine(String.Format(&quot;Pixelformat:{0}&quot;, **wrapper.Bitmap**.PixelFormat));
+	**wrapper.Dispose();**
+}
+</code></pre><p>}</p><p>public class ClientIIa
+{
+private PicturePool2 m_Pool;
+public ClientIIa(PicturePool2 pool)
+{
+if(pool == null) throw new ArgumentNullException(&ldquo;pool&rdquo;);
+m_Pool = pool;
+}
+public void Run()
+{
+<strong>BitmapWrapper wrapper</strong> = m_Pool[@&ldquo;D:\tmp\bild.jpg&rdquo;];
+Image thumbnail = <strong>wrapper.Bitmap</strong>.GetThumbnailImage(200, 200, null, IntPtr.Zero);
+thumbnail.Save(@&ldquo;D:\tmp\bild_thumbnail.jpg&rdquo;);
+<strong>wrapper.Dispose();</strong>
+}
+}</p><p>public class PicturePool2
+{
+private Dictionary&lt;string, WeakReference> m_Pool;</p><pre><code>public PicturePool2()
+{
+	m\_Pool = new Dictionary&lt;string, WeakReference&gt;();
+}
+
+public **BitmapWrapper** this\[string path\]
+{
+	get
+	{
+		if(String.IsNullOrEmpty(path)) throw new ArgumentNullException(&quot;path&quot;);
+		return GetPicture(path);
+	}
+}
+
+private **BitmapWrapper** GetPicture(string path)
+{
+	if(!m\_Pool.ContainsKey(path) || !m\_Pool\[path\].IsAlive || m\_Pool\[path\].Target == null)
+	{
+		m\_Pool\[path\] = new WeakReference(new BitmapWrapper(path));
+	}
+	else
+	{
+		**BitmapWrapper pic = m\_Pool\[path\].Target as BitmapWrapper;
+		if(pic.Disposed)
+		{
+			m\_Pool\[path\] = new WeakReference(new BitmapWrapper(path));
+		}**
+	}
+	return m\_Pool\[path\].Target as **BitmapWrapper**;
+}
+</code></pre><p>}</p><p>**public sealed class BitmapWrapper : IDisposable
+{
+public BitmapWrapper(string path)
+{
+if(String.IsNullOrEmpty(&ldquo;path&rdquo;)) throw new ArgumentNullException(&ldquo;path&rdquo;);
+Bitmap = new Bitmap(path);
+}</p><pre><code>public bool Disposed { get; private set; }
+public Bitmap Bitmap { get; private set; }
+
+public void Dispose()
+{
+	Disposed = true;
+	Bitmap.Dispose();
+}
+</code></pre><p>}**</p><p>Dies ist kein All-Heil-Mittel, sollte jemand wrapper.Bitmap.Dispose() aufrufen, kommt es zum alten Problem.  Doch für viele Szenarien, ist diese Variante absolut ausreichend. Die Königs-Lösung ist ein komplett Wrapper für das Bitmap dieser</p><ul><li>Leitet sich von System.Drawing.Image ab und ist sealed</li><li>Beinhaltet einen privaten Member vom Typ System.Drawing.Bitmap</li><li>Implementiert alle public Methoden von Bitmap und Image und leitet diese an den privaten Member weiter (notfalls mit new Überschreiben)</li><li>Implementiert IDisposable und die public Property Disposed</li></ul><p>Diesen Komplett Wrapper zu schreiben ist etwas aufwendig, lohnt sich irgendwann (kommt auf die Größe und die Laufzeit des Projektes an).</p><p>Ich hoffe das dieser Blog Eintrag etwas weiterhelfen konnte. :-D</p><hr><ul class=pager><li class=next><a href=/blog/post/2011-06-08-tracinglogging-config-file/ data-toggle=tooltip data-placement=top title="Tracing/Logging und die Config-Datei">Next
+Post &rarr;</a></li></ul></div><div class="col-lg-2 col-lg-offset-0
+visible-lg-block
+sidebar-container
+catalog-container"><div class=side-catalog><hr class="hidden-sm hidden-xs"><h5><a class=catalog-toggle href=#>CATALOG</a></h5><ul class=catalog-body></ul></div></div><div class="col-lg-8 col-lg-offset-2
+col-md-10 col-md-offset-1
+sidebar-container"></div></div></div></article><footer><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><ul class="list-inline text-center"><li><a href=mailto:this-is@alexander-koepke.de><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fas fa-envelope fa-stack-1x fa-inverse"></i></span></a></li><li><a href=https://twitter.com/koepalex><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-twitter fa-stack-1x fa-inverse"></i></span></a></li><li><a target=_blank href=https://github.com/koepalex><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-github fa-stack-1x fa-inverse"></i></span></a></li><li><a target=_blank href=https://www.linkedin.com/in/alexander-k%c3%b6pke-3222a21b7/><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-linkedin fa-stack-1x fa-inverse"></i></span></a></li><li><a target=_blank href=https://stackoverflow.com/users/9474615/koepalex><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-stack-overflow fa-stack-1x fa-inverse"></i></span></a></li><li><a target=_blank href=@koepalex@dotnet.social><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-mastodon fa-stack-1x fa-inverse"></i></span></a></li><li><a href rel=alternate type=application/rss+xml title><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fas fa-rss fa-stack-1x fa-inverse"></i></span></a></li></ul><p class="copyright text-muted">Copyright &copy; 2024<br><a href=https://themes.gohugo.io/hugo-theme-cleanwhite>CleanWhite Hugo Theme</a> by <a href=https://zhaohuabing.com>Huabing</a> |
+<iframe style=margin-left:2px;margin-bottom:-5px frameborder=0 scrolling=0 width=100px height=20px src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true"></iframe></p></div></div></div></footer><script>function loadAsync(e,t){var s=document,o="script",n=s.createElement(o),i=s.getElementsByTagName(o)[0];n.src=e,t&&n.addEventListener("load",function(e){t(null,e)},!1),i.parentNode.insertBefore(n,i)}</script><script>$("#tag_cloud").length!==0&&loadAsync("/js/jquery.tagcloud.js",function(){$.fn.tagcloud.defaults={color:{start:"#bbbbee",end:"#0085a1"}},$("#tag_cloud a").tagcloud()})</script><script>loadAsync("https://cdn.jsdelivr.net/npm/fastclick@1.0.6/lib/fastclick.min.js",function(){var e=document.querySelector("nav");e&&FastClick.attach(e)})</script><script type=text/javascript>function generateCatalog(e){_containerSelector="div.post-container";var t,n,s,o,i,a=$(_containerSelector),r=a.find("h1,h2,h3,h4,h5,h6");return $(e).html(""),r.each(function(){t=$(this).prop("tagName").toLowerCase(),o="#"+$(this).prop("id"),n=$(this).text(),i=$('<a href="'+o+'" rel="nofollow">'+n+"</a>"),s=$('<li class="'+t+'_nav"></li>').append(i),$(e).append(s)}),!0}generateCatalog(".catalog-body"),$(".catalog-toggle").click(function(e){e.preventDefault(),$(".side-catalog").toggleClass("fold")}),loadAsync("/blog/js/jquery.nav.js",function(){$(".catalog-body").onePageNav({currentClass:"active",changeHash:!1,easing:"swing",filter:"",scrollSpeed:700,scrollOffset:0,scrollThreshold:.2,begin:null,end:null,scrollChange:null,padding:80})})</script></body></html>

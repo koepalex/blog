@@ -1,0 +1,56 @@
+<!doctype html><html lang=de-de><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1"><meta property="og:site_name" content><meta property="og:type" content="article"><meta property="og:image" content="https://koepalex.github.io/blog//koepalex.logo.gif"><meta property="twitter:image" content="https://koepalex.github.io/blog//koepalex.logo.gif"><meta name=title content="Tracing/Logging und die Config-Datei"><meta property="og:title" content="Tracing/Logging und die Config-Datei"><meta property="twitter:title" content="Tracing/Logging und die Config-Datei"><meta name=description content="Technischer Artikel, das Universum und der ganze Rest"><meta property="og:description" content="Technischer Artikel, das Universum und der ganze Rest"><meta property="twitter:description" content="Technischer Artikel, das Universum und der ganze Rest"><meta property="twitter:card" content="summary"><meta name=keyword content><link rel="shortcut icon" href=/blog/img/favicon.ico><title>Tracing/Logging und die Config-Datei | </title><link rel=canonical href=/blog/post/2011-06-08-tracinglogging-config-file/><link rel=stylesheet href=/blog/css/bootstrap.min.css><link rel=stylesheet href=/blog/css/hugo-theme-cleanwhite.min.css><link rel=stylesheet href=/blog/css/zanshang.css><link rel=stylesheet href=/blog/css/font-awesome.all.min.css><script src=/blog/js/jquery.min.js></script><script src=/blog/js/bootstrap.min.js></script><script src=/blog/js/hux-blog.min.js></script><script src=/blog/js/lazysizes.min.js></script></head><nav class="navbar navbar-default navbar-custom navbar-fixed-top"><div class=container-fluid><div class="navbar-header page-scroll"><button type=button class=navbar-toggle>
+<span class=sr-only>Toggle navigation</span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+</button>
+<a class=navbar-brand href=/></a></div><div id=huxblog_navbar><div class=navbar-collapse><ul class="nav navbar-nav navbar-right"><li><a href=/blog>All Posts</a></li><li><a href=/blog/categories/allgemein/>allgemein</a></li><li><a href=/blog/categories/c-net/>c-net</a></li><li><a href=/blog/categories/java/>java</a></li><li><a href=/blog/categories/macos/>macos</a></li><li><a href=/blog/categories/ubuntu/>ubuntu</a></li><li><a href=/blog/categories/zfs/>zfs</a></li><li><a href=/blog/search><i class="fa fa-search"></i></a></li></ul></div></div></div></nav><script>var $body=document.body,$toggle=document.querySelector(".navbar-toggle"),$navbar=document.querySelector("#huxblog_navbar"),$collapse=document.querySelector(".navbar-collapse");$toggle.addEventListener("click",handleMagic);function handleMagic(){$navbar.className.indexOf("in")>0?($navbar.className=" ",setTimeout(function(){$navbar.className.indexOf("in")<0&&($collapse.style.height="0px")},400)):($collapse.style.height="auto",$navbar.className+=" in")}</script><style type=text/css>header.intro-header{background-image:url(/blog/koepalex.logo.gif)}</style><header class=intro-header><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><div class=post-heading><div class=tags><a class=tag href=/tags/net title=net>net
+</a><a class=tag href=/tags/c title=c>c
+</a><a class=tag href=/tags/config title=config>config
+</a><a class=tag href=/tags/trace title=trace>trace</a></div><h1>Tracing/Logging und die Config-Datei</h1><h2 class=subheading></h2><span class=meta>Posted by
+on
+Wednesday, June 8, 2011</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
+col-md-10 col-md-offset-1
+post-container"><p>Logging von Informationen ist so gut wie in jedem Programm notwendig. Nicht alle Entwickler können oder wollen ein professionelles Log-Tool wie z.B. <a href=http://logging.apache.org/log4net/index.html>log4net</a> oder <a href=http://nlog-project.org/>nlog</a> verwenden. In vielen Fällen reichen auch Debug.WriteLine oder Trace.WriteLine (letztes schreibt auch wenn die Software im Modus „Release“ kompiliert wurde).</p><p>Über eine Config-Datei lassen sich u.a. verschiedene TraceListener auswählen:</p><ol><li>ConsoleTraceListener</li><li>DefaultTraceListener</li><li>DelimitedListTraceListener</li><li>EventLogTraceListener</li><li>EventSchemaTraceListener</li><li>TextWriterTraceListener</li><li>XmlWriterTraceListener</li><li>eigene Implementierungen welche sich von TraceListener ableiten</li></ol><p>Damit kann man ohne neu kompilieren des Assemblies einfach den Ausgabeort des Trace-Informationen verändern.</p><p>Eine Config-Datei ist eine XML-Datei mit dem Namen des Assemblies und der Extension .config z.B. MeinBeispielApp.exe.config für das Programm MeinBeispielApp.exe. Visual Studio erkennt die Datei-Extension und bietet eine entsprechende Intellisense an. In einem Beispiel sollen die zwischen Ergebnisse einer Berechnung geloggt werden, der DefaultTraceListener schreibt diese Daten in den Debug-Stream des Betriebssystems.</p><p>Class Program
+{
+static void Main(string[] args)
+{
+Stopwatch sw = new Stopwatch();
+sw.Start();
+Console.WriteLine(&ldquo;Result:{0}&rdquo;, Worker.Calculate(1, 100000));
+sw.Stop();
+Console.WriteLine(&ldquo;ElapsedTime:{0}&rdquo;, sw.ElapsedTicks);
+//output:
+//Result:21081692,7461519
+//ElapsedTime:82659575
+}
+}
+class Worker
+{
+internal static double Calculate(int min, int max)
+{
+double result = 0.0;
+for(int i = min; i &lt; max; i++)
+{
+result += Math.Sqrt((double)i);
+Trace.WriteLine(String.Format(&ldquo;Interimresult:\t{0}&rdquo;,
+result));
+}
+return result;
+}
+}</p><p>Wenn das Programm auf einem anderen Rechner ausgeführt wird (z.B. beim Kunden), währe ist es einfacher den Trace in einer Datei zu haben anstatt Remote zu Debuggen. Die Datei kann anschließend dem Entwickler zugesand werden kann. Um dies zu erreichen, dazu muss man in der Config-Datei nur etwas eintragen:</p><p>Die Config-Datei muss sich im selben Ordner wie das Assembly befinden. Tracing im kostet viel Zeit, die Methode Calculate benötigt ~ 80000000 Ticks zur Berechnung des Ergebnis mit aktiven Trace, aber nur ~215000 Ticks ohne. Daher sollte man darüber nachdenken ob man (wenn man die Software freigibt) nicht eine Config-Datei beilegt, welche alle TraceListener ausschaltet und diese nur in Problemfällen über die Config-Datei einschalten lässt. Eine Config-Datei welche alle Listener entfernt (auch welche Programmatisch z.B. via Trace.Listeners.Add(newXmlWriterTraceListener(@&ldquo;C:\log.xml&rdquo;)); hinzugefügt wurden) sieht z.B. so aus:</p><p>Wer eine schöne Ausgabe sehen möchte, die Logs eventuell auf einen Webserver ablegen möchte oder verschiedene Log-Level (Info, Warning, Error) benutzen dem seien die oben erwähnten professionellen Log Tools empfohlen. Über die Config-Datei lassen sich noch viel mehr Einstellungen vornehmen, es lohnt sich damit zu Beschäftigen. Die erste Anlaufstelle für Informationen ist die <a href="http://msdn.microsoft.com/en-us/library/1fk1t1t0(v=VS.90).aspx">MSDN</a>.</p><hr><ul class=pager><li class=previous><a href=/blog/post/2011-06-07-something-idisposable/ data-toggle=tooltip data-placement=top title="Einiges über IDisposable">&larr;
+Previous Post</a></li><li class=next><a href=/blog/post/2011-06-10-events-uber-threadgrenzen/ data-toggle=tooltip data-placement=top title="Events über Threadgrenzen">Next
+Post &rarr;</a></li></ul></div><div class="col-lg-2 col-lg-offset-0
+visible-lg-block
+sidebar-container
+catalog-container"><div class=side-catalog><hr class="hidden-sm hidden-xs"><h5><a class=catalog-toggle href=#>CATALOG</a></h5><ul class=catalog-body></ul></div></div><div class="col-lg-8 col-lg-offset-2
+col-md-10 col-md-offset-1
+sidebar-container"></div></div></div></article><footer><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><ul class="list-inline text-center"><li><a href=mailto:this-is@alexander-koepke.de><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fas fa-envelope fa-stack-1x fa-inverse"></i></span></a></li><li><a href=https://twitter.com/koepalex><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-twitter fa-stack-1x fa-inverse"></i></span></a></li><li><a target=_blank href=https://github.com/koepalex><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-github fa-stack-1x fa-inverse"></i></span></a></li><li><a target=_blank href=https://www.linkedin.com/in/alexander-k%c3%b6pke-3222a21b7/><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-linkedin fa-stack-1x fa-inverse"></i></span></a></li><li><a target=_blank href=https://stackoverflow.com/users/9474615/koepalex><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-stack-overflow fa-stack-1x fa-inverse"></i></span></a></li><li><a target=_blank href=@koepalex@dotnet.social><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-mastodon fa-stack-1x fa-inverse"></i></span></a></li><li><a href rel=alternate type=application/rss+xml title><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fas fa-rss fa-stack-1x fa-inverse"></i></span></a></li></ul><p class="copyright text-muted">Copyright &copy; 2024<br><a href=https://themes.gohugo.io/hugo-theme-cleanwhite>CleanWhite Hugo Theme</a> by <a href=https://zhaohuabing.com>Huabing</a> |
+<iframe style=margin-left:2px;margin-bottom:-5px frameborder=0 scrolling=0 width=100px height=20px src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true"></iframe></p></div></div></div></footer><script>function loadAsync(e,t){var s=document,o="script",n=s.createElement(o),i=s.getElementsByTagName(o)[0];n.src=e,t&&n.addEventListener("load",function(e){t(null,e)},!1),i.parentNode.insertBefore(n,i)}</script><script>$("#tag_cloud").length!==0&&loadAsync("/js/jquery.tagcloud.js",function(){$.fn.tagcloud.defaults={color:{start:"#bbbbee",end:"#0085a1"}},$("#tag_cloud a").tagcloud()})</script><script>loadAsync("https://cdn.jsdelivr.net/npm/fastclick@1.0.6/lib/fastclick.min.js",function(){var e=document.querySelector("nav");e&&FastClick.attach(e)})</script><script type=text/javascript>function generateCatalog(e){_containerSelector="div.post-container";var t,n,s,o,i,a=$(_containerSelector),r=a.find("h1,h2,h3,h4,h5,h6");return $(e).html(""),r.each(function(){t=$(this).prop("tagName").toLowerCase(),o="#"+$(this).prop("id"),n=$(this).text(),i=$('<a href="'+o+'" rel="nofollow">'+n+"</a>"),s=$('<li class="'+t+'_nav"></li>').append(i),$(e).append(s)}),!0}generateCatalog(".catalog-body"),$(".catalog-toggle").click(function(e){e.preventDefault(),$(".side-catalog").toggleClass("fold")}),loadAsync("/blog/js/jquery.nav.js",function(){$(".catalog-body").onePageNav({currentClass:"active",changeHash:!1,easing:"swing",filter:"",scrollSpeed:700,scrollOffset:0,scrollThreshold:.2,begin:null,end:null,scrollChange:null,padding:80})})</script></body></html>
