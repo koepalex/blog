@@ -31,6 +31,10 @@ home = ["HTML", "RSS"]
         linkedin = "https://www.linkedin.com/in/alexander-köpke-3222a21b7/"
         stackoverflow = "https://stackoverflow.com/users/9474615/koepalex"
         mastodon = "@koepalex@dotnet.social"
+
+    [[params.addtional_menus]]
+        title =  "ABOUT"
+        href =  "/blog/about/"
         
     [params.style]
         darkestColor = "#315659"
