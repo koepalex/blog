@@ -4,41 +4,63 @@
 <span class=icon-bar></span>
 <span class=icon-bar></span>
 </button>
-<a class=navbar-brand href=/></a></div><div id=huxblog_navbar><div class=navbar-collapse><ul class="nav navbar-nav navbar-right"><li><a href=/blog>All Posts</a></li><li><a href=/blog/categories/allgemein/>allgemein</a></li><li><a href=/blog/categories/c-net/>c-net</a></li><li><a href=/blog/categories/java/>java</a></li><li><a href=/blog/categories/macos/>macos</a></li><li><a href=/blog/categories/ubuntu/>ubuntu</a></li><li><a href=/blog/categories/zfs/>zfs</a></li><li><a href=/blog/search><i class="fa fa-search"></i></a></li></ul></div></div></div></nav><script>var $body=document.body,$toggle=document.querySelector(".navbar-toggle"),$navbar=document.querySelector("#huxblog_navbar"),$collapse=document.querySelector(".navbar-collapse");$toggle.addEventListener("click",handleMagic);function handleMagic(){$navbar.className.indexOf("in")>0?($navbar.className=" ",setTimeout(function(){$navbar.className.indexOf("in")<0&&($collapse.style.height="0px")},400)):($collapse.style.height="auto",$navbar.className+=" in")}</script><style type=text/css>header.intro-header{background-image:url(/blog/koepalex.logo.gif)}</style><header class=intro-header><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><div class=post-heading><div class=tags><a class=tag href=/tags/net title=net>net
-</a><a class=tag href=/tags/c title=c>c
+<a class=navbar-brand href=/></a></div><div id=huxblog_navbar><div class=navbar-collapse><ul class="nav navbar-nav navbar-right"><li><a href=/blog>All Posts</a></li><li><a href=/blog/categories/dotnet/>dotnet</a></li><li><a href=/blog/categories/miscellaneous/>miscellaneous</a></li><li><a href=/blog/about//>ABOUT</a></li><li><a href=/blog/search><i class="fa fa-search"></i></a></li></ul></div></div></div></nav><script>var $body=document.body,$toggle=document.querySelector(".navbar-toggle"),$navbar=document.querySelector("#huxblog_navbar"),$collapse=document.querySelector(".navbar-collapse");$toggle.addEventListener("click",handleMagic);function handleMagic(){$navbar.className.indexOf("in")>0?($navbar.className=" ",setTimeout(function(){$navbar.className.indexOf("in")<0&&($collapse.style.height="0px")},400)):($collapse.style.height="auto",$navbar.className+=" in")}</script><style type=text/css>header.intro-header{background-image:url(/blog/koepalex.logo.gif)}</style><header class=intro-header><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><div class=post-heading><div class=tags><a class=tag href=/tags/dotnet title=dotnet>dotnet
+</a><a class=tag href=/tags/c title=c#>c#
 </a><a class=tag href=/tags/config title=config>config
 </a><a class=tag href=/tags/trace title=trace>trace</a></div><h1>Tracing/Logging und die Config-Datei</h1><h2 class=subheading></h2><span class=meta>Posted by
 on
 Wednesday, June 8, 2011</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><p>Logging von Informationen ist so gut wie in jedem Programm notwendig. Nicht alle Entwickler können oder wollen ein professionelles Log-Tool wie z.B. <a href=http://logging.apache.org/log4net/index.html>log4net</a> oder <a href=http://nlog-project.org/>nlog</a> verwenden. In vielen Fällen reichen auch Debug.WriteLine oder Trace.WriteLine (letztes schreibt auch wenn die Software im Modus „Release“ kompiliert wurde).</p><p>Über eine Config-Datei lassen sich u.a. verschiedene TraceListener auswählen:</p><ol><li>ConsoleTraceListener</li><li>DefaultTraceListener</li><li>DelimitedListTraceListener</li><li>EventLogTraceListener</li><li>EventSchemaTraceListener</li><li>TextWriterTraceListener</li><li>XmlWriterTraceListener</li><li>eigene Implementierungen welche sich von TraceListener ableiten</li></ol><p>Damit kann man ohne neu kompilieren des Assemblies einfach den Ausgabeort des Trace-Informationen verändern.</p><p>Eine Config-Datei ist eine XML-Datei mit dem Namen des Assemblies und der Extension .config z.B. MeinBeispielApp.exe.config für das Programm MeinBeispielApp.exe. Visual Studio erkennt die Datei-Extension und bietet eine entsprechende Intellisense an. In einem Beispiel sollen die zwischen Ergebnisse einer Berechnung geloggt werden, der DefaultTraceListener schreibt diese Daten in den Debug-Stream des Betriebssystems.</p><p>Class Program
-{
-static void Main(string[] args)
-{
-Stopwatch sw = new Stopwatch();
-sw.Start();
-Console.WriteLine(&ldquo;Result:{0}&rdquo;, Worker.Calculate(1, 100000));
-sw.Stop();
-Console.WriteLine(&ldquo;ElapsedTime:{0}&rdquo;, sw.ElapsedTicks);
-//output:
-//Result:21081692,7461519
-//ElapsedTime:82659575
-}
-}
-class Worker
-{
-internal static double Calculate(int min, int max)
-{
-double result = 0.0;
-for(int i = min; i &lt; max; i++)
-{
-result += Math.Sqrt((double)i);
-Trace.WriteLine(String.Format(&ldquo;Interimresult:\t{0}&rdquo;,
-result));
-}
-return result;
-}
-}</p><p>Wenn das Programm auf einem anderen Rechner ausgeführt wird (z.B. beim Kunden), währe ist es einfacher den Trace in einer Datei zu haben anstatt Remote zu Debuggen. Die Datei kann anschließend dem Entwickler zugesand werden kann. Um dies zu erreichen, dazu muss man in der Config-Datei nur etwas eintragen:</p><p>Die Config-Datei muss sich im selben Ordner wie das Assembly befinden. Tracing im kostet viel Zeit, die Methode Calculate benötigt ~ 80000000 Ticks zur Berechnung des Ergebnis mit aktiven Trace, aber nur ~215000 Ticks ohne. Daher sollte man darüber nachdenken ob man (wenn man die Software freigibt) nicht eine Config-Datei beilegt, welche alle TraceListener ausschaltet und diese nur in Problemfällen über die Config-Datei einschalten lässt. Eine Config-Datei welche alle Listener entfernt (auch welche Programmatisch z.B. via Trace.Listeners.Add(newXmlWriterTraceListener(@&ldquo;C:\log.xml&rdquo;)); hinzugefügt wurden) sieht z.B. so aus:</p><p>Wer eine schöne Ausgabe sehen möchte, die Logs eventuell auf einen Webserver ablegen möchte oder verschiedene Log-Level (Info, Warning, Error) benutzen dem seien die oben erwähnten professionellen Log Tools empfohlen. Über die Config-Datei lassen sich noch viel mehr Einstellungen vornehmen, es lohnt sich damit zu Beschäftigen. Die erste Anlaufstelle für Informationen ist die <a href="http://msdn.microsoft.com/en-us/library/1fk1t1t0(v=VS.90).aspx">MSDN</a>.</p><hr><ul class=pager><li class=previous><a href=/blog/post/2011-06-07-something-idisposable/ data-toggle=tooltip data-placement=top title="Einiges über IDisposable">&larr;
+post-container"><p>Logging von Informationen ist so gut wie in jedem Programm notwendig. Nicht alle Entwickler können oder wollen ein professionelles Log-Tool wie z.B. <a href=http://logging.apache.org/log4net/index.html>log4net</a> oder <a href=http://nlog-project.org/>nlog</a> verwenden. In vielen Fällen reichen auch Debug.WriteLine oder Trace.WriteLine (letztes schreibt auch wenn die Software im Modus „Release“ kompiliert wurde).</p><p>Über eine Config-Datei lassen sich u.a. verschiedene TraceListener auswählen:</p><ol><li>ConsoleTraceListener</li><li>DefaultTraceListener</li><li>DelimitedListTraceListener</li><li>EventLogTraceListener</li><li>EventSchemaTraceListener</li><li>TextWriterTraceListener</li><li>XmlWriterTraceListener</li><li>eigene Implementierungen welche sich von TraceListener ableiten</li></ol><p>Damit kann man ohne neu kompilieren des Assemblies einfach den Ausgabeort des Trace-Informationen verändern.</p><p>Eine Config-Datei ist eine XML-Datei mit dem Namen des Assemblies und der Extension .config z.B. MeinBeispielApp.exe.config für das Programm MeinBeispielApp.exe. Visual Studio erkennt die Datei-Extension und bietet eine entsprechende Intellisense an. In einem Beispiel sollen die zwischen Ergebnisse einer Berechnung geloggt werden, der DefaultTraceListener schreibt diese Daten in den Debug-Stream des Betriebssystems.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=display:flex><span>Class Program
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#ff79c6>void</span> Main(<span style=color:#8be9fd>string</span>\[\] args)
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		Stopwatch sw = <span style=color:#ff79c6>new</span> Stopwatch();
+</span></span><span style=display:flex><span>		sw.Start();
+</span></span><span style=display:flex><span>		Console.WriteLine(<span style=color:#f1fa8c>&#34;Result:{0}&#34;</span>, Worker.Calculate(<span style=color:#bd93f9>1</span>, <span style=color:#bd93f9>100000</span>));
+</span></span><span style=display:flex><span>		sw.Stop();
+</span></span><span style=display:flex><span>		Console.WriteLine(<span style=color:#f1fa8c>&#34;ElapsedTime:{0}&#34;</span>, sw.ElapsedTicks);
+</span></span><span style=display:flex><span>		<span style=color:#6272a4>//output:</span>
+</span></span><span style=display:flex><span>		<span style=color:#6272a4>//Result:21081692,7461519</span>
+</span></span><span style=display:flex><span>		<span style=color:#6272a4>//ElapsedTime:82659575</span>
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#ff79c6>class</span> <span style=color:#50fa7b>Worker</span>
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>internal</span> <span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#8be9fd>double</span> Calculate(<span style=color:#8be9fd>int</span> min, <span style=color:#8be9fd>int</span> max)
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		<span style=color:#8be9fd>double</span> result = <span style=color:#bd93f9>0.0</span>;
+</span></span><span style=display:flex><span>		<span style=color:#ff79c6>for</span>(<span style=color:#8be9fd>int</span> i = min; i &lt; max; i++)
+</span></span><span style=display:flex><span>		{
+</span></span><span style=display:flex><span>			result += Math.Sqrt((<span style=color:#8be9fd>double</span>)i);
+</span></span><span style=display:flex><span>			Trace.WriteLine(String.Format(<span style=color:#f1fa8c>&#34;Interimresult:\\t{0}&#34;</span>,
+</span></span><span style=display:flex><span>                          result));
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>		<span style=color:#ff79c6>return</span>	result;
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>Wenn das Programm auf einem anderen Rechner ausgeführt wird (z.B. beim Kunden), währe ist es einfacher den Trace in einer Datei zu haben anstatt Remote zu Debuggen. Die Datei kann anschließend dem Entwickler zugesand werden kann. Um dies zu erreichen, dazu muss man in der Config-Datei nur etwas eintragen:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-xml data-lang=xml><span style=display:flex><span><span style=color:#ff79c6>&lt;?xmlversion=&#34;1.0&#34;encoding=&#34;utf-8&#34;?&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>&lt;configuration&gt;</span>
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>&lt;system.diagnostics&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;trace&gt;</span>
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>&lt;listeners&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;add</span> <span style=color:#50fa7b>name=</span><span style=color:#f1fa8c>&#34;otherListener&#34;</span> <span style=color:#50fa7b>initializeData=</span><span style=color:#f1fa8c>&#34;D:\\tmp\\trace.txt&#34;</span>
+</span></span><span style=display:flex><span>             <span style=color:#50fa7b>type=</span><span style=color:#f1fa8c>&#34;System.Diagnostics.TextWriterTraceListener&#34;</span> <span style=color:#ff79c6>/&gt;</span>
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>&lt;/listeners&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;/trace&gt;</span>
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>&lt;/system.diagnostics&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>&lt;/configuration&gt;</span>
+</span></span></code></pre></div><p>Die Config-Datei muss sich im selben Ordner wie das Assembly befinden. Tracing im kostet viel Zeit, die Methode Calculate benötigt ~ 80000000 Ticks zur Berechnung des Ergebnis mit aktiven Trace, aber nur ~215000 Ticks ohne. Daher sollte man darüber nachdenken ob man (wenn man die Software freigibt) nicht eine Config-Datei beilegt, welche alle TraceListener ausschaltet und diese nur in Problemfällen über die Config-Datei einschalten lässt. Eine Config-Datei welche alle Listener entfernt (auch welche Programmatisch z.B. via Trace.Listeners.Add(newXmlWriterTraceListener(@&ldquo;C:\log.xml&rdquo;)); hinzugefügt wurden) sieht z.B. so aus:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-xml data-lang=xml><span style=display:flex><span><span style=color:#ff79c6>&lt;?xmlversion=&#34;1.0&#34;encoding=&#34;utf-8&#34;?&gt;</span>
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>&lt;configuration&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>&lt;system.diagnostics&gt;</span>
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>&lt;trace&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;listeners&gt;</span>
+</span></span><span style=display:flex><span>          <span style=color:#ff79c6>&lt;clear/&gt;</span> <span style=color:#6272a4>&lt;!-- Disable all TraceListener --&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>&lt;/listeners&gt;</span>
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>&lt;/trace&gt;</span>
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>&lt;/system.diagnostics&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>&lt;/configuration&gt;</span>
+</span></span></code></pre></div><p>Wer eine schöne Ausgabe sehen möchte, die Logs eventuell auf einen Webserver ablegen möchte oder verschiedene Log-Level (Info, Warning, Error) benutzen dem seien die oben erwähnten professionellen Log Tools empfohlen. Über die Config-Datei lassen sich noch viel mehr Einstellungen vornehmen, es lohnt sich damit zu Beschäftigen. Die erste Anlaufstelle für Informationen ist die <a href="http://msdn.microsoft.com/en-us/library/1fk1t1t0(v=VS.90).aspx">MSDN</a>.</p><hr><ul class=pager><li class=previous><a href=/blog/post/2011-06-07-something-idisposable/ data-toggle=tooltip data-placement=top title="Einiges über IDisposable">&larr;
 Previous Post</a></li><li class=next><a href=/blog/post/2011-06-10-events-uber-threadgrenzen/ data-toggle=tooltip data-placement=top title="Events über Threadgrenzen">Next
 Post &rarr;</a></li></ul></div><div class="col-lg-2 col-lg-offset-0
 visible-lg-block

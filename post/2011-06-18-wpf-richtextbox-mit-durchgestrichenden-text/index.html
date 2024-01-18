@@ -4,8 +4,8 @@
 <span class=icon-bar></span>
 <span class=icon-bar></span>
 </button>
-<a class=navbar-brand href=/></a></div><div id=huxblog_navbar><div class=navbar-collapse><ul class="nav navbar-nav navbar-right"><li><a href=/blog>All Posts</a></li><li><a href=/blog/categories/allgemein/>allgemein</a></li><li><a href=/blog/categories/c-net/>c-net</a></li><li><a href=/blog/categories/java/>java</a></li><li><a href=/blog/categories/macos/>macos</a></li><li><a href=/blog/categories/ubuntu/>ubuntu</a></li><li><a href=/blog/categories/zfs/>zfs</a></li><li><a href=/blog/search><i class="fa fa-search"></i></a></li></ul></div></div></div></nav><script>var $body=document.body,$toggle=document.querySelector(".navbar-toggle"),$navbar=document.querySelector("#huxblog_navbar"),$collapse=document.querySelector(".navbar-collapse");$toggle.addEventListener("click",handleMagic);function handleMagic(){$navbar.className.indexOf("in")>0?($navbar.className=" ",setTimeout(function(){$navbar.className.indexOf("in")<0&&($collapse.style.height="0px")},400)):($collapse.style.height="auto",$navbar.className+=" in")}</script><style type=text/css>header.intro-header{background-image:url(/blog/koepalex.logo.gif)}</style><header class=intro-header><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><div class=post-heading><div class=tags><a class=tag href=/tags/net title=net>net
-</a><a class=tag href=/tags/c title=c>c
+<a class=navbar-brand href=/></a></div><div id=huxblog_navbar><div class=navbar-collapse><ul class="nav navbar-nav navbar-right"><li><a href=/blog>All Posts</a></li><li><a href=/blog/categories/dotnet/>dotnet</a></li><li><a href=/blog/categories/miscellaneous/>miscellaneous</a></li><li><a href=/blog/about//>ABOUT</a></li><li><a href=/blog/search><i class="fa fa-search"></i></a></li></ul></div></div></div></nav><script>var $body=document.body,$toggle=document.querySelector(".navbar-toggle"),$navbar=document.querySelector("#huxblog_navbar"),$collapse=document.querySelector(".navbar-collapse");$toggle.addEventListener("click",handleMagic);function handleMagic(){$navbar.className.indexOf("in")>0?($navbar.className=" ",setTimeout(function(){$navbar.className.indexOf("in")<0&&($collapse.style.height="0px")},400)):($collapse.style.height="auto",$navbar.className+=" in")}</script><style type=text/css>header.intro-header{background-image:url(/blog/koepalex.logo.gif)}</style><header class=intro-header><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><div class=post-heading><div class=tags><a class=tag href=/tags/dotnet title=dotnet>dotnet
+</a><a class=tag href=/tags/c title=c#>c#
 </a><a class=tag href=/tags/durchgestrichen title=durchgestrichen>durchgestrichen
 </a><a class=tag href=/tags/richtextbox title=richtextbox>richtextbox
 </a><a class=tag href=/tags/strikethrough title=strikethrough>strikethrough
@@ -14,62 +14,125 @@
 on
 Saturday, June 18, 2011</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><p>Um bei einer WPF RichTextBox einen Text <strong>Fett</strong>, <em>Kursiv</em> oder Unterstrichen darzustellen ist nicht viel notwenig. Eigentlich muss man im XAML nur einen (Toggle)Button definieren, der ein Kommando (EditingCommands) an die RichTextBox sendet:</p><p></p><p>Genauso einfach verhält es sich einen Text Hochgestellt oder Tiefgestellt darzustellen, mann muss nur zusätzlich noch die Schrift-Familie des Hinter der RichTextBox liegenden Dokumentes verändern:</p><p></p><p>Die Veränderungen an dem Text funktionieren in zwei Modi:</p><ol><li>Ein Text wurde selektiert und der entsprechende Button geklickt, dies bewirkt das nur der selektierte Text beeinflusst wird.</li><li>Der Button wird geklickt ohne das Text selektiert ist, dies bewirkt das der danach neu geschriebene Text beeinflusst wird.</li></ol><p>Einen Text Durchgestrichen (Strikethrough) anzuzeigen ist etwas Komplizierter, da die Klasse EditingCommands keine Eigenschaft ToggleStrikethrough besitzt. Im Internet finde man viele Webseiten die einem Zeigen wie man den Modi 1 Implmentiert:</p><p> </p><p>private void myStrikethroughButtonClicked(object sender, RoutedEventArgs e)
-{
-if(myRichTextBox == null) return;
-if(!myRichTextBox.Selection.IsEmpty)
-HandleStrikethrouphSelection();
-}
-private void HandleStrikethrouphSelection()
-{
-TextDecorationCollection decoratorCollection =
-myRichTextBox.Selection.GetPropertyValue(Inline.TextDecorationsProperty) as
-TextDecorationCollection;
-if(decoratorCollection == null) return;</p><p>TextRange range = new TextRange(myRichTextBox.Selection.Start,
-myRichTextBox.Selection.End);</p><p>if(!decoratorCollection.Equals(TextDecorations.Strikethrough))
-decoratorCollection = TextDecorations.Strikethrough;
-else
-decoratorCollection = new TextDecorationCollection();</p><p>range.ApplyPropertyValue(Inline.TextDecorationsProperty, decoratorCollection);
-}</p><p>Eine Lösung um den Modi 2 umzusetzen fand ich bei der Internet-Recherce nicht. Daher habe ich so lange Programmiert bis ich eine gefunden habe. Der Trick ist sich im Button-Click-Eventhandler ein Flag zu setzen (bzw. Rücksetzen). Im RichTextBox-TextChanged-Eventhandler wird dieses Flag gelesen um die TextDecorationCollection entweder neu zu erstellen oder auf TextDecorations.Strikethrough zusetzen.</p><p></p><p>private bool IsRtfFlagActive(RtfFlags expected)
-{
-return (m_ActiveFlags & expected) == expected;
-}</p><p>private void ApplyPropertyValueToText(int begin, int end, 
-DependencyProperty involvedProperty, object value)</p><p>{
-if(begin &lt; 0 || end &lt; 0)
-throw new ArgumentException(&ldquo;negative text position isn&rsquo;t supported&rdquo;);
-if(involvedProperty == null)
-throw new ArgumentNullException(&ldquo;involvedProperty&rdquo;);
-if(value == null) throw new ArgumentNullException(&ldquo;value&rdquo;);</p><p>var contentStart = myRichTextBox.Document.ContentStart;
-var beginPos = contentStart.GetPositionAtOffset(begin);
-var endPos = contentStart.GetPositionAtOffset(end);
-var text = new TextRange(beginPos, endPos);
-text.ApplyPropertyValue(involvedProperty, value);
-}
-private void HandleStrikethroughGeneral(int begin, int end)
-{
-TextDecorationCollection decoratorCollection = myRichTextBox.Selection.GetPropertyValue
-(Inline.TextDecorationsProperty) as TextDecorationCollection;
-if(decoratorCollection == null) return;</p><p>decoratorCollection = IsRtfFlagActive(RtfFlags.STRIKETHROUGH)
-? TextDecorations.Strikethrough
-: new TextDecorationCollection();</p><p>ApplyPropertyValueToText(begin, end, Inline.TextDecorationsProperty,
-decoratorCollection);
-}
-private void myStrikethroughButtonClicked(object sender, RoutedEventArgs e)
-{
-if(myRichTextBox == null) return;</p><p>if(!myRichTextBox.Selection.IsEmpty)
-HandleStrikethrouphSelection();
-else
-UpdateActiveFlags(RtfFlags.STRIKETHROUGH);</p><p>myRichTextBox.Focus();
-}</p><p>private void myRichTextBoxTextChanged(object sender, TextChangedEventArgs e)
-{
-foreach(var change in e.Changes)
-{
-if(change.RemovedLength == 0)//only work whether something added
-HandleStrikethroughGeneral(change.Offset,
-change.Offset + change.AddedLength);
-}
-}</p><hr><ul class=pager><li class=previous><a href=/blog/post/2011-06-10-events-uber-threadgrenzen/ data-toggle=tooltip data-placement=top title="Events über Threadgrenzen">&larr;
-Previous Post</a></li><li class=next><a href=/blog/post/2011-07-10-wpf-lern-videos/ data-toggle=tooltip data-placement=top title="WPF Lern Videos">Next
+post-container"><p>Um bei einer WPF RichTextBox einen Text <strong>Fett</strong>, <em>Kursiv</em> oder Unterstrichen darzustellen ist nicht viel notwenig. Eigentlich muss man im XAML nur einen (Toggle)Button definieren, der ein Kommando (EditingCommands) an die RichTextBox sendet:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-xml data-lang=xml><span style=display:flex><span><span style=color:#ff79c6>&lt;ToggleButton</span>
+</span></span><span style=display:flex><span>  <span style=color:#50fa7b>Command=</span><span style=color:#f1fa8c>&#34;EditingCommands.ToggleItalic&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#50fa7b>CommandTarget=</span><span style=color:#f1fa8c>&#34;{Binding ElementName=myRichTextBox}&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#50fa7b>Content=</span><span style=color:#f1fa8c>&#34;Italic&#34;</span><span style=color:#ff79c6>/&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>&lt;RichTextBox/&gt;</span>
+</span></span></code></pre></div><p>Genauso einfach verhält es sich einen Text Hochgestellt oder Tiefgestellt darzustellen, mann muss nur zusätzlich noch die Schrift-Familie des Hinter der RichTextBox liegenden Dokumentes verändern:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-xml data-lang=xml><span style=display:flex><span><span style=color:#ff79c6>&lt;ToggleButton</span>
+</span></span><span style=display:flex><span>  <span style=color:#50fa7b>Command=</span><span style=color:#f1fa8c>&#34;EditingCommands.ToggleSubscript&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#50fa7b>CommandTarget=</span><span style=color:#f1fa8c>&#34;{Binding ElementName=myRichTextBox}&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#50fa7b>Content=</span><span style=color:#f1fa8c>&#34;Subscript&#34;</span><span style=color:#ff79c6>/&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>&lt;RichTextBox/&gt;</span>
+</span></span><span style=display:flex><span>  <span style=color:#6272a4>&lt;!--on default fontfamily subscript and superscript dont work!!--&gt;</span>
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>&lt;FlowDocument</span> <span style=color:#50fa7b>FontFamily=</span><span style=color:#f1fa8c>&#34;Palatino Linotype&#34;</span> <span style=color:#50fa7b>FontSize=</span><span style=color:#f1fa8c>&#34;14&#34;</span><span style=color:#ff79c6>/&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>&lt;/RichTextBox&gt;</span>
+</span></span></code></pre></div><p>Die Veränderungen an dem Text funktionieren in zwei Modi:</p><ol><li>Ein Text wurde selektiert und der entsprechende Button geklickt, dies bewirkt das nur der selektierte Text beeinflusst wird.</li><li>Der Button wird geklickt ohne das Text selektiert ist, dies bewirkt das der danach neu geschriebene Text beeinflusst wird.</li></ol><p>Einen Text Durchgestrichen (Strikethrough) anzuzeigen ist etwas Komplizierter, da die Klasse EditingCommands keine Eigenschaft ToggleStrikethrough besitzt. Im Internet finde man viele Webseiten die einem Zeigen wie man den Modi 1 Implmentiert:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-xml data-lang=xml><span style=display:flex><span><span style=color:#ff79c6>&lt;ToggleButton</span>
+</span></span><span style=display:flex><span>  <span style=color:#50fa7b>Click=</span><span style=color:#f1fa8c>&#34;myStrikethroughButtonClicked&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#50fa7b>Content=</span><span style=color:#f1fa8c>&#34;Strikethrough&#34;</span><span style=color:#ff79c6>/&gt;</span> 
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>private</span> <span style=color:#ff79c6>void</span> myStrikethroughButtonClicked(<span style=color:#8be9fd>object</span> sender, RoutedEventArgs e)
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>if</span>(myRichTextBox == <span style=color:#ff79c6>null</span>) <span style=color:#ff79c6>return</span>;
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>if</span>(!myRichTextBox.Selection.IsEmpty)
+</span></span><span style=display:flex><span>    HandleStrikethrouphSelection();
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>private</span> <span style=color:#ff79c6>void</span> HandleStrikethrouphSelection()
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>  TextDecorationCollection decoratorCollection =
+</span></span><span style=display:flex><span>  myRichTextBox.Selection.GetPropertyValue(Inline.TextDecorationsProperty) <span style=color:#ff79c6>as</span>
+</span></span><span style=display:flex><span>  TextDecorationCollection;
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>if</span>(decoratorCollection == <span style=color:#ff79c6>null</span>) <span style=color:#ff79c6>return</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  TextRange range = <span style=color:#ff79c6>new</span> TextRange(myRichTextBox.Selection.Start,
+</span></span><span style=display:flex><span>  myRichTextBox.Selection.End);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>if</span>(!decoratorCollection.Equals(TextDecorations.Strikethrough))
+</span></span><span style=display:flex><span>    decoratorCollection = TextDecorations.Strikethrough;
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>else</span>
+</span></span><span style=display:flex><span>    decoratorCollection = <span style=color:#ff79c6>new</span> TextDecorationCollection();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  range.ApplyPropertyValue(Inline.TextDecorationsProperty, decoratorCollection);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>Eine Lösung um den Modi 2 umzusetzen fand ich bei der Internet-Recherce nicht. Daher habe ich so lange Programmiert bis ich eine gefunden habe. Der Trick ist sich im Button-Click-Eventhandler ein Flag zu setzen (bzw. Rücksetzen). Im RichTextBox-TextChanged-Eventhandler wird dieses Flag gelesen um die TextDecorationCollection entweder neu zu erstellen oder auf TextDecorations.Strikethrough zusetzen.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-xml data-lang=xml><span style=display:flex><span><span style=color:#ff79c6>&lt;ToggleButton</span>
+</span></span><span style=display:flex><span>  <span style=color:#50fa7b>Click=</span><span style=color:#f1fa8c>&#34;myStrikethroughButtonClicked&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#50fa7b>Content=</span><span style=color:#f1fa8c>&#34;Strikethrough&#34;</span><span style=color:#ff79c6>/&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>&lt;RichTextBox</span> <span style=color:#50fa7b>TextChanged=</span><span style=color:#f1fa8c>&#34;myRichTextBoxTextChanged&#34;</span><span style=color:#ff79c6>&gt;</span>
+</span></span><span style=display:flex><span>  <span style=color:#6272a4>&lt;!-- on default fontfamily subscript and superscript dont work!!--&gt;</span>
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>&lt;FlowDocument</span> <span style=color:#50fa7b>FontFamily=</span><span style=color:#f1fa8c>&#34;Palatino Linotype&#34;</span> <span style=color:#50fa7b>FontSize=</span><span style=color:#f1fa8c>&#34;14&#34;</span><span style=color:#ff79c6>/&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>&lt;/RichTextBox&gt;</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=display:flex><span><span style=color:#50fa7b>[Flags]</span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>private</span> <span style=color:#8be9fd;font-style:italic>enum</span> RtfFlags
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>  NONE=<span style=color:#bd93f9>0</span>,
+</span></span><span style=display:flex><span>  STRIKETHROUGH=<span style=color:#bd93f9>1</span>,
+</span></span><span style=display:flex><span>  COLORING=<span style=color:#bd93f9>2</span>,
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>private</span> RtfFlags m_ActiveFlags = RtfFlags.NONE;
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>private</span> <span style=color:#ff79c6>void</span> UpdateActiveFlags(RtfFlags expected)
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>if</span>((m_ActiveFlags &amp; expected) == expected)
+</span></span><span style=display:flex><span>    m_ActiveFlags &amp;= ~expected; <span style=color:#6272a4>//unset flag</span>
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>else</span>
+</span></span><span style=display:flex><span>    m_ActiveFlags |= expected; <span style=color:#6272a4>//set flag</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>private</span> <span style=color:#8be9fd>bool</span> IsRtfFlagActive(RtfFlags expected)
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>return</span> (m_ActiveFlags &amp; expected) == expected;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>private</span> <span style=color:#ff79c6>void</span> ApplyPropertyValueToText(<span style=color:#8be9fd>int</span> begin, <span style=color:#8be9fd>int</span> end, 
+</span></span><span style=display:flex><span>  DependencyProperty involvedProperty, <span style=color:#8be9fd>object</span> <span style=color:#ff79c6>value</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>if</span>(begin &lt; <span style=color:#bd93f9>0</span> || end &lt; <span style=color:#bd93f9>0</span>)
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>throw</span> <span style=color:#ff79c6>new</span> ArgumentException(<span style=color:#f1fa8c>&#34;negative text position isn&#39;t supported&#34;</span>);
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>if</span>(involvedProperty == <span style=color:#ff79c6>null</span>)
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>throw</span> <span style=color:#ff79c6>new</span> ArgumentNullException(<span style=color:#f1fa8c>&#34;involvedProperty&#34;</span>);
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>if</span>(<span style=color:#ff79c6>value</span> == <span style=color:#ff79c6>null</span>) <span style=color:#ff79c6>throw</span> <span style=color:#ff79c6>new</span> ArgumentNullException(<span style=color:#f1fa8c>&#34;value&#34;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#8be9fd>var</span> contentStart = myRichTextBox.Document.ContentStart;
+</span></span><span style=display:flex><span>  <span style=color:#8be9fd>var</span> beginPos = contentStart.GetPositionAtOffset(begin);
+</span></span><span style=display:flex><span>  <span style=color:#8be9fd>var</span> endPos = contentStart.GetPositionAtOffset(end);
+</span></span><span style=display:flex><span>  <span style=color:#8be9fd>var</span> text = <span style=color:#ff79c6>new</span> TextRange(beginPos, endPos);
+</span></span><span style=display:flex><span>  text.ApplyPropertyValue(involvedProperty, <span style=color:#ff79c6>value</span>);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>private</span> <span style=color:#ff79c6>void</span> HandleStrikethroughGeneral(<span style=color:#8be9fd>int</span> begin, <span style=color:#8be9fd>int</span> end)
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>  TextDecorationCollection decoratorCollection = myRichTextBox.Selection.GetPropertyValue
+</span></span><span style=display:flex><span>    (Inline.TextDecorationsProperty) <span style=color:#ff79c6>as</span> TextDecorationCollection;
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>if</span>(decoratorCollection == <span style=color:#ff79c6>null</span>) <span style=color:#ff79c6>return</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  decoratorCollection = IsRtfFlagActive(RtfFlags.STRIKETHROUGH)
+</span></span><span style=display:flex><span>   ? TextDecorations.Strikethrough
+</span></span><span style=display:flex><span>   : <span style=color:#ff79c6>new</span> TextDecorationCollection();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  ApplyPropertyValueToText(begin, end, Inline.TextDecorationsProperty,
+</span></span><span style=display:flex><span>    decoratorCollection);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>private</span> <span style=color:#ff79c6>void</span> myStrikethroughButtonClicked(<span style=color:#8be9fd>object</span> sender, RoutedEventArgs e)
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>if</span>(myRichTextBox == <span style=color:#ff79c6>null</span>) <span style=color:#ff79c6>return</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>if</span>(!myRichTextBox.Selection.IsEmpty)
+</span></span><span style=display:flex><span>    HandleStrikethrouphSelection();
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>else</span>
+</span></span><span style=display:flex><span>    UpdateActiveFlags(RtfFlags.STRIKETHROUGH);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  myRichTextBox.Focus();
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>private</span> <span style=color:#ff79c6>void</span> myRichTextBoxTextChanged(<span style=color:#8be9fd>object</span> sender, TextChangedEventArgs e)
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>foreach</span>(<span style=color:#8be9fd>var</span> change <span style=color:#ff79c6>in</span> e.Changes)
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>if</span>(change.RemovedLength == <span style=color:#bd93f9>0</span>)<span style=color:#6272a4>//only work whether something added</span>
+</span></span><span style=display:flex><span>      HandleStrikethroughGeneral(change.Offset,
+</span></span><span style=display:flex><span>        change.Offset + change.AddedLength);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><hr><ul class=pager><li class=previous><a href=/blog/post/2011-06-10-events-uber-threadgrenzen/ data-toggle=tooltip data-placement=top title="Events über Threadgrenzen">&larr;
+Previous Post</a></li><li class=next><a href=/blog/post/2011-11-07-unauthorizedaccessexception-beim-kopieren-einer-datei/ data-toggle=tooltip data-placement=top title="UnauthorizedAccessException beim Kopieren einer Datei">Next
 Post &rarr;</a></li></ul></div><div class="col-lg-2 col-lg-offset-0
 visible-lg-block
 sidebar-container

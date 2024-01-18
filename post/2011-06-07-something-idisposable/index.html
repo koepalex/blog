@@ -4,229 +4,265 @@
 <span class=icon-bar></span>
 <span class=icon-bar></span>
 </button>
-<a class=navbar-brand href=/></a></div><div id=huxblog_navbar><div class=navbar-collapse><ul class="nav navbar-nav navbar-right"><li><a href=/blog>All Posts</a></li><li><a href=/blog/categories/allgemein/>allgemein</a></li><li><a href=/blog/categories/c-net/>c-net</a></li><li><a href=/blog/categories/java/>java</a></li><li><a href=/blog/categories/macos/>macos</a></li><li><a href=/blog/categories/ubuntu/>ubuntu</a></li><li><a href=/blog/categories/zfs/>zfs</a></li><li><a href=/blog/search><i class="fa fa-search"></i></a></li></ul></div></div></div></nav><script>var $body=document.body,$toggle=document.querySelector(".navbar-toggle"),$navbar=document.querySelector("#huxblog_navbar"),$collapse=document.querySelector(".navbar-collapse");$toggle.addEventListener("click",handleMagic);function handleMagic(){$navbar.className.indexOf("in")>0?($navbar.className=" ",setTimeout(function(){$navbar.className.indexOf("in")<0&&($collapse.style.height="0px")},400)):($collapse.style.height="auto",$navbar.className+=" in")}</script><style type=text/css>header.intro-header{background-image:url(/blog/koepalex.logo.gif)}</style><header class=intro-header><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><div class=post-heading><div class=tags><a class=tag href=/tags/net title=net>net
+<a class=navbar-brand href=/></a></div><div id=huxblog_navbar><div class=navbar-collapse><ul class="nav navbar-nav navbar-right"><li><a href=/blog>All Posts</a></li><li><a href=/blog/categories/dotnet/>dotnet</a></li><li><a href=/blog/categories/miscellaneous/>miscellaneous</a></li><li><a href=/blog/about//>ABOUT</a></li><li><a href=/blog/search><i class="fa fa-search"></i></a></li></ul></div></div></div></nav><script>var $body=document.body,$toggle=document.querySelector(".navbar-toggle"),$navbar=document.querySelector("#huxblog_navbar"),$collapse=document.querySelector(".navbar-collapse");$toggle.addEventListener("click",handleMagic);function handleMagic(){$navbar.className.indexOf("in")>0?($navbar.className=" ",setTimeout(function(){$navbar.className.indexOf("in")<0&&($collapse.style.height="0px")},400)):($collapse.style.height="auto",$navbar.className+=" in")}</script><style type=text/css>header.intro-header{background-image:url(/blog/koepalex.logo.gif)}</style><header class=intro-header><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><div class=post-heading><div class=tags><a class=tag href=/tags/dotnet title=dotnet>dotnet
 </a><a class=tag href=/tags/bitmap title=bitmap>bitmap
-</a><a class=tag href=/tags/c title=c>c
+</a><a class=tag href=/tags/c title=c#>c#
 </a><a class=tag href=/tags/idisposable title=idisposable>idisposable</a></div><h1>Einiges über IDisposable</h1><h2 class=subheading></h2><span class=meta>Posted by
 on
 Tuesday, June 7, 2011</span></div></div></div></div></header><article><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2
 col-md-10 col-md-offset-1
-post-container"><p>Das Standard Interface IDisposable welches  zur &ldquo;Freigabe&rdquo; von Ressourcen in .Net dient ist recht Einfach:</p><p>public interface IDisposable
-{
-void Dispose();
-}</p><p>Nur dieses Interface zu Implementieren reicht in vielen Fällen nicht aus. Es gibt z.B. einen FxCop Fehler <a href="http://msdn.microsoft.com/en-us/library/ms244737(v=vs.80).aspx">Implement IDisposable correctly</a>, dieser erscheint u.a. bei non-sealed Klassen welche keinen Medthode mit der Signatur protected virtual Dispose(bool) besitzen.  IDisposable zu Implementieren wird nötig wenn man:</p><ol><li>unmanged (native) Ressourcen lädt um diese wieder freizugeben</li><li>managed Felder besitzt, welche wiederum IDisposable implementieren</li></ol><p>Im folgenden Beispiel zeigt eine (nach FxCop komplette Implementierung) einer Basis-Klasse  und einer Kind-Klasse:</p><p>public class ManagedBasisClassI : IDisposable
-{</p><pre><code>~ManagedBasisClassI()
-{
-	Dispose(false);
-}
-
-public void Dispose()
-{
-	Dispose(true);
-}
-
-protected virtual void Dispose(bool disposing)
-{
-	if (disposing)
-	{
-		//clean managed ressources
-		GC.SuppressFinalize(this);
-	}
-	//clean unmanaged ressources
-}
-</code></pre><p>}</p><p>public class ManagedChildClass : ManagedBasisClassI
-{
-protected override void Dispose(bool disposing)
-{
-try
-{
-if (disposing)
-{
-//clean managed ressources
-}
-//clean unmanaged ressources
-}
-finally
-{
-base.Dispose(disposing);
-}
-}
-}</p><p>Man darf jetzt nicht auf die Idee kommen, dass IDisposable im .Net Framework dazu dient den Lebenszyklus von Objekten zu steuern. Objekte existieren mindestens so lange, wie eine Referenz auf sie besteht (Ausnahme: WeakReference). Bitte das &ldquo;mindestens&rdquo; beachten, denn wann ein Objekt aus dem Speicher verschwindet, auf das keine Referenz mehr existiert entscheidet nur der Garbage Collector. Zugriffe auf Objekte die noch existieren, aber bei denen Dispose bereits aufgerufen wurde, enden oft in Exceptions. Die Klasse Bitmap wirft in solchen Fällen eine  ArgumentException “Ungültiger Parameter“.  Eigene Klassen sollte man daher eine Weitere public Property erhalten, durch welche man Abfragen kann ob das Objekt bereits Disposed wurde oder gerade Disposed wird. In solchen Fällen, darf man auf das Objekt nicht mehr Zugreifen, sondern muss es Neuanlegen.</p><p>public class ManagedBasisClassII : IDisposable
-{
-~ManagedBasisClassII()
-{
-Dispose(false);
-}</p><pre><code>public void Dispose()
-{
-	Dispose(true);
-}
-
-protected virtual void Dispose(bool disposing)
-{
-	**if (Disposing) throw new ObjectDisposedException(this.ToString());
-	Disposing = true;**
-	if (disposing)
-	{
-		//clean managed ressources
-		GC.SuppressFinalize(this);
-	}
-	//clean unmanaged ressources
-}
-
-**public bool Disposing { get; private set; }**
-</code></pre><p>}</p><p>Diese Lösung trägt für eigene Objekte sehr gut. Problematisch wird es bei Objekten von Klassen des .Net Framework selbst. Der nächste Quelltext stellt eine kleines Dummy Programm dar, indem 2 Clients Zugriff auf ein und das selbe <a href=http://msdn.microsoft.com/en-us/library/system.drawing.image.aspx>Bitmap</a> Objekt möchten. Client1 ruft Dispose am Bitmap auf nach Verwendung (was auch sehr gut ist). Client2 bekommt beim Versuch das Bitmap aus einem Pool zu laden, die Referenz auf das alte Objekt, beim Zugriff auf eine der Methoden des Objektes kommt es zum Absturz des Programmes.</p><p>class Program
-{
-static void Main(string[] args)
-{
-PicturePool pool = new PicturePool();
-ClientI client1 = new ClientI(pool);
-client1.Run();
-ClientII client2 = new ClientII(pool);
-client2.Run();
-}
-}</p><p>public class ClientI
-{
-private PicturePool m_Pool;
-public ClientI(PicturePool pool)
-{
-if(pool == null) throw new ArgumentNullException(&ldquo;pool&rdquo;);
-m_Pool = pool;
-}</p><pre><code>public void Run()
-{
-	Bitmap pic = m\_Pool\[@&quot;D:\\tmp\\bild.jpg&quot;\];
-	Console.WriteLine(String.Format(&quot;Height:{0}&quot;, pic.Height));
-	Console.WriteLine(String.Format(&quot;Width:{0}&quot;, pic.Width));
-	Console.WriteLine(String.Format(&quot;Pixelformat:{0}&quot;, pic.PixelFormat));
-	pic.Dispose();
-}
-</code></pre><p>}</p><p>public class ClientII
-{
-private PicturePool m_Pool;
-public ClientII(PicturePool pool)
-{
-if(pool == null) throw new ArgumentNullException(&ldquo;pool&rdquo;);
-m_Pool = pool;
-}
-public void Run()
-{
-Bitmap pic = m_Pool[@&ldquo;D:\tmp\bild.jpg&rdquo;];
-<strong><em>//ArgumentException"UngültigerParameter"</em></strong>
-Image thumbnail = pic.GetThumbnailImage(200, 200, null, IntPtr.Zero);
-thumbnail.Save(@&ldquo;D:\tmp\bild_thumbnail.jpg&rdquo;); pic.Dispose();
-}
-}</p><p>public class PicturePool
-{
-private Dictionary&lt;string, WeakReference> m_Pool;</p><pre><code>public PicturePool()
-{
-	m\_Pool = new Dictionary&lt;string, WeakReference&gt;();
-}
-
-public Bitmap this\[string path\]
-{
-	get
-	{
-		if(String.IsNullOrEmpty(path)) throw new ArgumentNullException(&quot;path&quot;);
-		return GetPicture(path);
-	}
-}
-
-private Bitmap GetPicture(string path)
-{
-	if(!m\_Pool.ContainsKey(path) || !m\_Pool\[path\].IsAlive || m\_Pool\[path\].Target == null)
-	{
-		m\_Pool\[path\] = new WeakReference(new Bitmap(path));
-	}
-	**_//WeakReference.IsAlvie kann true sein aber das Target bereits Disposed
-	//was kann man tun?_**
-	Return m\_Pool\[path\].Target as Bitmap;
-}
-</code></pre><p>}</p><p>Da es nicht Möglich ist zu ermitteln ob das Bitmap-Objekt bereits Disposed ist kommt es zu dem oberen Absturz. Eine einfache Lösung  ist ein Wrapper um das Bitmap Objekt (eine Ableitung kann es nicht sein, da die Klasse Bitmap Sealed ist). Der PicturePool gibt nur noch Referenzen auf einen BitmapWrapper herraus und fragt am BitmapWrapper ob er Disposed ist, wenn ja muss der Wrapper für dieses Bitmap neu geladen werden.</p><p>class Program
-{
-static void Main(string[] args)
-{
-PicturePool2 pool = new PicturePool2();
-ClientIa client1 = new ClientIa(pool);
-client1.Run();
-ClientIIa client2 = new ClientIIa(pool);
-client2.Run();
-}
-}</p><p>public class ClientIa
-{
-private PicturePool2 m_Pool;
-public ClientIa(PicturePool2 pool)
-{
-if(pool == null) throw new ArgumentNullException(&ldquo;pool&rdquo;);
-m_Pool = pool;
-}</p><pre><code>public void Run()
-{
-	**BitmapWrapper wrapper** = m\_Pool\[@&quot;D:\\tmp\\bild.jpg&quot;\];
-	Console.WriteLine(String.Format(&quot;Height:{0}&quot;, **wrapper.Bitmap**.Height));
-	Console.WriteLine(String.Format(&quot;Width:{0}&quot;, **wrapper.Bitmap**.Width));
-	Console.WriteLine(String.Format(&quot;Pixelformat:{0}&quot;, **wrapper.Bitmap**.PixelFormat));
-	**wrapper.Dispose();**
-}
-</code></pre><p>}</p><p>public class ClientIIa
-{
-private PicturePool2 m_Pool;
-public ClientIIa(PicturePool2 pool)
-{
-if(pool == null) throw new ArgumentNullException(&ldquo;pool&rdquo;);
-m_Pool = pool;
-}
-public void Run()
-{
-<strong>BitmapWrapper wrapper</strong> = m_Pool[@&ldquo;D:\tmp\bild.jpg&rdquo;];
-Image thumbnail = <strong>wrapper.Bitmap</strong>.GetThumbnailImage(200, 200, null, IntPtr.Zero);
-thumbnail.Save(@&ldquo;D:\tmp\bild_thumbnail.jpg&rdquo;);
-<strong>wrapper.Dispose();</strong>
-}
-}</p><p>public class PicturePool2
-{
-private Dictionary&lt;string, WeakReference> m_Pool;</p><pre><code>public PicturePool2()
-{
-	m\_Pool = new Dictionary&lt;string, WeakReference&gt;();
-}
-
-public **BitmapWrapper** this\[string path\]
-{
-	get
-	{
-		if(String.IsNullOrEmpty(path)) throw new ArgumentNullException(&quot;path&quot;);
-		return GetPicture(path);
-	}
-}
-
-private **BitmapWrapper** GetPicture(string path)
-{
-	if(!m\_Pool.ContainsKey(path) || !m\_Pool\[path\].IsAlive || m\_Pool\[path\].Target == null)
-	{
-		m\_Pool\[path\] = new WeakReference(new BitmapWrapper(path));
-	}
-	else
-	{
-		**BitmapWrapper pic = m\_Pool\[path\].Target as BitmapWrapper;
-		if(pic.Disposed)
-		{
-			m\_Pool\[path\] = new WeakReference(new BitmapWrapper(path));
-		}**
-	}
-	return m\_Pool\[path\].Target as **BitmapWrapper**;
-}
-</code></pre><p>}</p><p>**public sealed class BitmapWrapper : IDisposable
-{
-public BitmapWrapper(string path)
-{
-if(String.IsNullOrEmpty(&ldquo;path&rdquo;)) throw new ArgumentNullException(&ldquo;path&rdquo;);
-Bitmap = new Bitmap(path);
-}</p><pre><code>public bool Disposed { get; private set; }
-public Bitmap Bitmap { get; private set; }
-
-public void Dispose()
-{
-	Disposed = true;
-	Bitmap.Dispose();
-}
-</code></pre><p>}**</p><p>Dies ist kein All-Heil-Mittel, sollte jemand wrapper.Bitmap.Dispose() aufrufen, kommt es zum alten Problem.  Doch für viele Szenarien, ist diese Variante absolut ausreichend. Die Königs-Lösung ist ein komplett Wrapper für das Bitmap dieser</p><ul><li>Leitet sich von System.Drawing.Image ab und ist sealed</li><li>Beinhaltet einen privaten Member vom Typ System.Drawing.Bitmap</li><li>Implementiert alle public Methoden von Bitmap und Image und leitet diese an den privaten Member weiter (notfalls mit new Überschreiben)</li><li>Implementiert IDisposable und die public Property Disposed</li></ul><p>Diesen Komplett Wrapper zu schreiben ist etwas aufwendig, lohnt sich irgendwann (kommt auf die Größe und die Laufzeit des Projektes an).</p><p>Ich hoffe das dieser Blog Eintrag etwas weiterhelfen konnte. :-D</p><hr><ul class=pager><li class=next><a href=/blog/post/2011-06-08-tracinglogging-config-file/ data-toggle=tooltip data-placement=top title="Tracing/Logging und die Config-Datei">Next
+post-container"><p>Das Standard Interface IDisposable welches  zur &ldquo;Freigabe&rdquo; von Ressourcen in .Net dient ist recht Einfach:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#ff79c6>interface</span> <span style=color:#50fa7b>IDisposable</span>
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>	<span style=color:#ff79c6>void</span> Dispose();
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>Nur dieses Interface zu Implementieren reicht in vielen Fällen nicht aus. Es gibt z.B. einen FxCop Fehler <a href="http://msdn.microsoft.com/en-us/library/ms244737(v=vs.80).aspx">Implement IDisposable correctly</a>, dieser erscheint u.a. bei non-sealed Klassen welche keinen Medthode mit der Signatur protected virtual Dispose(bool) besitzen.  IDisposable zu Implementieren wird nötig wenn man:</p><ol><li>unmanged (native) Ressourcen lädt um diese wieder freizugeben</li><li>managed Felder besitzt, welche wiederum IDisposable implementieren</li></ol><p>Im folgenden Beispiel zeigt eine (nach FxCop komplette Implementierung) einer Basis-Klasse  und einer Kind-Klasse:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#ff79c6>class</span> <span style=color:#50fa7b>ManagedBasisClassI</span> : IDisposable
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	~ManagedBasisClassI()
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		Dispose(<span style=color:#ff79c6>false</span>);
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#ff79c6>void</span> Dispose()
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		Dispose(<span style=color:#ff79c6>true</span>);
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>protected</span> <span style=color:#ff79c6>virtual</span> <span style=color:#ff79c6>void</span> Dispose(<span style=color:#8be9fd>bool</span> disposing)
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		<span style=color:#ff79c6>if</span> (disposing)
+</span></span><span style=display:flex><span>		{
+</span></span><span style=display:flex><span>			<span style=color:#6272a4>//clean managed ressources</span>
+</span></span><span style=display:flex><span>			GC.SuppressFinalize(<span style=color:#ff79c6>this</span>);
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>		<span style=color:#6272a4>//clean unmanaged ressources</span>
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#ff79c6>class</span> <span style=color:#50fa7b>ManagedChildClass</span> : ManagedBasisClassI
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>protected</span> <span style=color:#8be9fd;font-style:italic>override</span> <span style=color:#ff79c6>void</span> Dispose(<span style=color:#8be9fd>bool</span> disposing)
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		<span style=color:#ff79c6>try</span>
+</span></span><span style=display:flex><span>		{
+</span></span><span style=display:flex><span>			<span style=color:#ff79c6>if</span> (disposing)
+</span></span><span style=display:flex><span>			{
+</span></span><span style=display:flex><span>				<span style=color:#6272a4>//clean managed ressources</span>
+</span></span><span style=display:flex><span>			}
+</span></span><span style=display:flex><span>			<span style=color:#6272a4>//clean unmanaged ressources</span>
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>		<span style=color:#ff79c6>finally</span>
+</span></span><span style=display:flex><span>		{
+</span></span><span style=display:flex><span>			<span style=color:#ff79c6>base</span>.Dispose(disposing);
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>Man darf jetzt nicht auf die Idee kommen, dass IDisposable im .Net Framework dazu dient den Lebenszyklus von Objekten zu steuern. Objekte existieren mindestens so lange, wie eine Referenz auf sie besteht (Ausnahme: WeakReference). Bitte das &ldquo;mindestens&rdquo; beachten, denn wann ein Objekt aus dem Speicher verschwindet, auf das keine Referenz mehr existiert entscheidet nur der Garbage Collector. Zugriffe auf Objekte die noch existieren, aber bei denen Dispose bereits aufgerufen wurde, enden oft in Exceptions. Die Klasse Bitmap wirft in solchen Fällen eine  ArgumentException “Ungültiger Parameter“.  Eigene Klassen sollte man daher eine Weitere public Property erhalten, durch welche man Abfragen kann ob das Objekt bereits Disposed wurde oder gerade Disposed wird. In solchen Fällen, darf man auf das Objekt nicht mehr Zugreifen, sondern muss es Neuanlegen.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#ff79c6>class</span> <span style=color:#50fa7b>ManagedBasisClassII</span> : IDisposable
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>	~ManagedBasisClassII()
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		Dispose(<span style=color:#ff79c6>false</span>);
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#ff79c6>void</span> Dispose()
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		Dispose(<span style=color:#ff79c6>true</span>);
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>protected</span> <span style=color:#ff79c6>virtual</span> <span style=color:#ff79c6>void</span> Dispose(<span style=color:#8be9fd>bool</span> disposing)
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		<span style=color:#ff79c6>if</span> (Disposing) <span style=color:#ff79c6>throw</span> <span style=color:#ff79c6>new</span> ObjectDisposedException(<span style=color:#ff79c6>this</span>.ToString());
+</span></span><span style=display:flex><span>		Disposing = <span style=color:#ff79c6>true</span>;
+</span></span><span style=display:flex><span>		<span style=color:#ff79c6>if</span> (disposing)
+</span></span><span style=display:flex><span>		{
+</span></span><span style=display:flex><span>			<span style=color:#6272a4>//clean managed ressources</span>
+</span></span><span style=display:flex><span>			GC.SuppressFinalize(<span style=color:#ff79c6>this</span>);
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>		<span style=color:#6272a4>//clean unmanaged ressources</span>
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>bool</span> Disposing { <span style=color:#ff79c6>get</span>; <span style=color:#8be9fd;font-style:italic>private</span> <span style=color:#ff79c6>set</span>; }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>Diese Lösung trägt für eigene Objekte sehr gut. Problematisch wird es bei Objekten von Klassen des .Net Framework selbst. Der nächste Quelltext stellt eine kleines Dummy Programm dar, indem 2 Clients Zugriff auf ein und das selbe <a href=http://msdn.microsoft.com/en-us/library/system.drawing.image.aspx>Bitmap</a> Objekt möchten. Client1 ruft Dispose am Bitmap auf nach Verwendung (was auch sehr gut ist). Client2 bekommt beim Versuch das Bitmap aus einem Pool zu laden, die Referenz auf das alte Objekt, beim Zugriff auf eine der Methoden des Objektes kommt es zum Absturz des Programmes.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=display:flex><span><span style=color:#ff79c6>class</span> <span style=color:#50fa7b>Program</span>
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#ff79c6>void</span> Main(<span style=color:#8be9fd>string</span>[] args)
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		PicturePool pool = <span style=color:#ff79c6>new</span> PicturePool();
+</span></span><span style=display:flex><span>		ClientI client1 = <span style=color:#ff79c6>new</span> ClientI(pool);
+</span></span><span style=display:flex><span>		client1.Run();
+</span></span><span style=display:flex><span>		ClientII client2 = <span style=color:#ff79c6>new</span> ClientII(pool);
+</span></span><span style=display:flex><span>		client2.Run();
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#ff79c6>class</span> <span style=color:#50fa7b>ClientI</span>
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>private</span> PicturePool m_Pool;
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>public</span> ClientI(PicturePool pool)
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		<span style=color:#ff79c6>if</span>(pool == <span style=color:#ff79c6>null</span>) <span style=color:#ff79c6>throw</span> <span style=color:#ff79c6>new</span> ArgumentNullException(<span style=color:#f1fa8c>&#34;pool&#34;</span>);
+</span></span><span style=display:flex><span>		m_Pool = pool;
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#ff79c6>void</span> Run()
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		Bitmap pic = m_Pool[<span style=color:#f1fa8c>@&#34;D:\\tmp\\bild.jpg&#34;</span>];
+</span></span><span style=display:flex><span>		Console.WriteLine(String.Format(<span style=color:#f1fa8c>&#34;Height:{0}&#34;</span>, pic.Height));
+</span></span><span style=display:flex><span>		Console.WriteLine(String.Format(<span style=color:#f1fa8c>&#34;Width:{0}&#34;</span>, pic.Width));
+</span></span><span style=display:flex><span>		Console.WriteLine(String.Format(<span style=color:#f1fa8c>&#34;Pixelformat:{0}&#34;</span>, pic.PixelFormat));
+</span></span><span style=display:flex><span>		pic.Dispose();
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#ff79c6>class</span> <span style=color:#50fa7b>ClientII</span>
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>private</span> PicturePool m_Pool;
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>public</span> ClientII(PicturePool pool)
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		<span style=color:#ff79c6>if</span>(pool == <span style=color:#ff79c6>null</span>) <span style=color:#ff79c6>throw</span> <span style=color:#ff79c6>new</span> ArgumentNullException(<span style=color:#f1fa8c>&#34;pool&#34;</span>);
+</span></span><span style=display:flex><span>		m_Pool = pool;
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#ff79c6>void</span> Run()
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		Bitmap pic = m_Pool[<span style=color:#f1fa8c>@&#34;D:\\tmp\\bild.jpg&#34;</span>];
+</span></span><span style=display:flex><span>		<span style=color:#6272a4>//ArgumentException&#34;UngültigerParameter&#34;_</span>
+</span></span><span style=display:flex><span>		Image thumbnail = pic.GetThumbnailImage(<span style=color:#bd93f9>200</span>, <span style=color:#bd93f9>200</span>, <span style=color:#ff79c6>null</span>, IntPtr.Zero);
+</span></span><span style=display:flex><span>		thumbnail.Save(<span style=color:#f1fa8c>@&#34;D:\\tmp\\bild_thumbnail.jpg&#34;</span>);                 
+</span></span><span style=display:flex><span>		pic.Dispose();
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#ff79c6>class</span> <span style=color:#50fa7b>PicturePool</span>
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>private</span> Dictionary&lt;<span style=color:#8be9fd>string</span>, WeakReference&gt; m_Pool;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>public</span> PicturePool()
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		m_Pool = <span style=color:#ff79c6>new</span> Dictionary&lt;<span style=color:#8be9fd>string</span>, WeakReference&gt;();
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>public</span> Bitmap <span style=color:#ff79c6>this</span>[<span style=color:#8be9fd>string</span> path]
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		<span style=color:#ff79c6>get</span>
+</span></span><span style=display:flex><span>		{
+</span></span><span style=display:flex><span>			<span style=color:#ff79c6>if</span>(String.IsNullOrEmpty(path)) <span style=color:#ff79c6>throw</span> <span style=color:#ff79c6>new</span> ArgumentNullException(<span style=color:#f1fa8c>&#34;path&#34;</span>);
+</span></span><span style=display:flex><span>			<span style=color:#ff79c6>return</span> GetPicture(path);
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>private</span> Bitmap GetPicture(<span style=color:#8be9fd>string</span> path)
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		<span style=color:#ff79c6>if</span>(!m_Pool.ContainsKey(path) || !m_Pool[path].IsAlive || m_Pool[path].Target == <span style=color:#ff79c6>null</span>)
+</span></span><span style=display:flex><span>		{
+</span></span><span style=display:flex><span>			m_Pool[path] = <span style=color:#ff79c6>new</span> WeakReference(<span style=color:#ff79c6>new</span> Bitmap(path));
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>		<span style=color:#6272a4>//WeakReference.IsAlvie kann true sein aber das Target bereits Disposed</span>
+</span></span><span style=display:flex><span>		<span style=color:#6272a4>//was kann man tun?</span>
+</span></span><span style=display:flex><span>		Return m_Pool[path].Target <span style=color:#ff79c6>as</span> Bitmap;
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>Da es nicht Möglich ist zu ermitteln ob das Bitmap-Objekt bereits Disposed ist kommt es zu dem oberen Absturz. Eine einfache Lösung  ist ein Wrapper um das Bitmap Objekt (eine Ableitung kann es nicht sein, da die Klasse Bitmap Sealed ist). Der PicturePool gibt nur noch Referenzen auf einen BitmapWrapper herraus und fragt am BitmapWrapper ob er Disposed ist, wenn ja muss der Wrapper für dieses Bitmap neu geladen werden.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=display:flex><span><span style=color:#ff79c6>class</span> <span style=color:#50fa7b>Program</span>
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>static</span> <span style=color:#ff79c6>void</span> Main(<span style=color:#8be9fd>string</span>[] args)
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		PicturePool2 pool = <span style=color:#ff79c6>new</span> PicturePool2();
+</span></span><span style=display:flex><span>		ClientIa client1 = <span style=color:#ff79c6>new</span> ClientIa(pool);
+</span></span><span style=display:flex><span>		client1.Run();
+</span></span><span style=display:flex><span>		ClientIIa client2 = <span style=color:#ff79c6>new</span> ClientIIa(pool);
+</span></span><span style=display:flex><span>		client2.Run();
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#ff79c6>class</span> <span style=color:#50fa7b>ClientIa</span>
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>private</span> PicturePool2 m_Pool;
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>public</span> ClientIa(PicturePool2 pool)
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		<span style=color:#ff79c6>if</span>(pool == <span style=color:#ff79c6>null</span>) <span style=color:#ff79c6>throw</span> <span style=color:#ff79c6>new</span> ArgumentNullException(<span style=color:#f1fa8c>&#34;pool&#34;</span>);
+</span></span><span style=display:flex><span>		m_Pool = pool;
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#ff79c6>void</span> Run()
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		BitmapWrapper wrapper = m_Pool[<span style=color:#f1fa8c>@&#34;D:\\tmp\\bild.jpg&#34;</span>];
+</span></span><span style=display:flex><span>		Console.WriteLine(String.Format(<span style=color:#f1fa8c>&#34;Height:{0}&#34;</span>, wrapper.Bitmap.Height));
+</span></span><span style=display:flex><span>		Console.WriteLine(String.Format(<span style=color:#f1fa8c>&#34;Width:{0}&#34;</span>, wrapper.Bitmap.Width));
+</span></span><span style=display:flex><span>		Console.WriteLine(String.Format(<span style=color:#f1fa8c>&#34;Pixelformat:{0}&#34;</span>, wrapper.Bitmap.PixelFormat));
+</span></span><span style=display:flex><span>		wrapper.Dispose();
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#ff79c6>class</span> <span style=color:#50fa7b>ClientIIa</span>
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>private</span> PicturePool2 m_Pool;
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>public</span> ClientIIa(PicturePool2 pool)
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		<span style=color:#ff79c6>if</span>(pool == <span style=color:#ff79c6>null</span>) <span style=color:#ff79c6>throw</span> <span style=color:#ff79c6>new</span> ArgumentNullException(<span style=color:#f1fa8c>&#34;pool&#34;</span>);
+</span></span><span style=display:flex><span>		m_Pool = pool;
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#ff79c6>void</span> Run()
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		BitmapWrapper wrapper = m_Pool[<span style=color:#f1fa8c>@&#34;D:\\tmp\\bild.jpg&#34;</span>];
+</span></span><span style=display:flex><span>		Image thumbnail = wrapper.Bitmap.GetThumbnailImage(<span style=color:#bd93f9>200</span>, <span style=color:#bd93f9>200</span>, <span style=color:#ff79c6>null</span>, IntPtr.Zero);
+</span></span><span style=display:flex><span>		thumbnail.Save(<span style=color:#f1fa8c>@&#34;D:\\tmp\\bild_thumbnail.jpg&#34;</span>);
+</span></span><span style=display:flex><span>        wrapper.Dispose();
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#ff79c6>class</span> <span style=color:#50fa7b>PicturePool2</span>
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>private</span> Dictionary&lt;<span style=color:#8be9fd>string</span>, WeakReference&gt; m_Pool;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>public</span> PicturePool2()
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		m_Pool = <span style=color:#ff79c6>new</span> Dictionary&lt;<span style=color:#8be9fd>string</span>, WeakReference&gt;();
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>public</span> BitmapWrapper <span style=color:#ff79c6>this</span>[<span style=color:#8be9fd>string</span> path]
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		<span style=color:#ff79c6>get</span>
+</span></span><span style=display:flex><span>		{
+</span></span><span style=display:flex><span>			<span style=color:#ff79c6>if</span>(String.IsNullOrEmpty(path)) <span style=color:#ff79c6>throw</span> <span style=color:#ff79c6>new</span> ArgumentNullException(<span style=color:#f1fa8c>&#34;path&#34;</span>);
+</span></span><span style=display:flex><span>			<span style=color:#ff79c6>return</span> GetPicture(path);
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>private</span> BitmapWrapper GetPicture(<span style=color:#8be9fd>string</span> path)
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		<span style=color:#ff79c6>if</span>(!m_Pool.ContainsKey(path) || !m_Pool[path].IsAlive || m_Pool[path].Target == <span style=color:#ff79c6>null</span>)
+</span></span><span style=display:flex><span>		{
+</span></span><span style=display:flex><span>			m_Pool[path] = <span style=color:#ff79c6>new</span> WeakReference(<span style=color:#ff79c6>new</span> BitmapWrapper(path));
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>		<span style=color:#ff79c6>else</span>
+</span></span><span style=display:flex><span>		{
+</span></span><span style=display:flex><span>			BitmapWrapper pic = m_Pool[path].Target <span style=color:#ff79c6>as</span> BitmapWrapper;
+</span></span><span style=display:flex><span>			<span style=color:#ff79c6>if</span>(pic.Disposed)
+</span></span><span style=display:flex><span>			{
+</span></span><span style=display:flex><span>				m_Pool[path] = <span style=color:#ff79c6>new</span> WeakReference(<span style=color:#ff79c6>new</span> BitmapWrapper(path));
+</span></span><span style=display:flex><span>			}
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>		<span style=color:#ff79c6>return</span> m_Pool[path].Target <span style=color:#ff79c6>as</span> BitmapWrapper;
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd;font-style:italic>sealed</span> <span style=color:#ff79c6>class</span> <span style=color:#50fa7b>BitmapWrapper</span> : IDisposable
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>public</span> BitmapWrapper(<span style=color:#8be9fd>string</span> path)
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		<span style=color:#ff79c6>if</span>(String.IsNullOrEmpty(<span style=color:#f1fa8c>&#34;path&#34;</span>)) <span style=color:#ff79c6>throw</span> <span style=color:#ff79c6>new</span> ArgumentNullException(<span style=color:#f1fa8c>&#34;path&#34;</span>);
+</span></span><span style=display:flex><span>		Bitmap = <span style=color:#ff79c6>new</span> Bitmap(path);
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#8be9fd>bool</span> Disposed { <span style=color:#ff79c6>get</span>; <span style=color:#8be9fd;font-style:italic>private</span> <span style=color:#ff79c6>set</span>; }
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>public</span> Bitmap Bitmap { <span style=color:#ff79c6>get</span>; <span style=color:#8be9fd;font-style:italic>private</span> <span style=color:#ff79c6>set</span>; }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#8be9fd;font-style:italic>public</span> <span style=color:#ff79c6>void</span> Dispose()
+</span></span><span style=display:flex><span>	{
+</span></span><span style=display:flex><span>		Disposed = <span style=color:#ff79c6>true</span>;
+</span></span><span style=display:flex><span>		Bitmap.Dispose();
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>Dies ist kein All-Heil-Mittel, sollte jemand wrapper.Bitmap.Dispose() aufrufen, kommt es zum alten Problem.  Doch für viele Szenarien, ist diese Variante absolut ausreichend. Die Königs-Lösung ist ein komplett Wrapper für das Bitmap dieser</p><ul><li>Leitet sich von System.Drawing.Image ab und ist sealed</li><li>Beinhaltet einen privaten Member vom Typ System.Drawing.Bitmap</li><li>Implementiert alle public Methoden von Bitmap und Image und leitet diese an den privaten Member weiter (notfalls mit new Überschreiben)</li><li>Implementiert IDisposable und die public Property Disposed</li></ul><p>Diesen Komplett Wrapper zu schreiben ist etwas aufwendig, lohnt sich irgendwann (kommt auf die Größe und die Laufzeit des Projektes an).</p><p>Ich hoffe das dieser Blog Eintrag etwas weiterhelfen konnte. :-D</p><hr><ul class=pager><li class=next><a href=/blog/post/2011-06-08-tracinglogging-config-file/ data-toggle=tooltip data-placement=top title="Tracing/Logging und die Config-Datei">Next
 Post &rarr;</a></li></ul></div><div class="col-lg-2 col-lg-offset-0
 visible-lg-block
 sidebar-container
