@@ -2,10 +2,10 @@
 title: "WPF RichTextBox mit Durchgestrichenden Text"
 date: "2011-06-18"
 categories: 
-  - "c-net"
+  - "dotnet"
 tags: 
-  - "net"
-  - "c"
+  - "dotnet"
+  - "c#"
   - "durchgestrichen"
   - "richtextbox"
   - "strikethrough"
@@ -15,14 +15,17 @@ tags:
 
 Um bei einer WPF RichTextBox einen Text **Fett**, _Kursiv_ oder Unterstrichen darzustellen ist nicht viel notwenig. Eigentlich muss man im XAML nur einen (Toggle)Button definieren, der ein Kommando (EditingCommands) an die RichTextBox sendet:
 
+```xml
 <ToggleButton
   Command="EditingCommands.ToggleItalic"
   CommandTarget="{Binding ElementName=myRichTextBox}"
   Content="Italic"/>
 <RichTextBox/>
+```
 
 Genauso einfach verhält es sich einen Text Hochgestellt oder Tiefgestellt darzustellen, mann muss nur zusätzlich noch die Schrift-Familie des Hinter der RichTextBox liegenden Dokumentes verändern:
 
+```xml
 <ToggleButton
   Command="EditingCommands.ToggleSubscript"
   CommandTarget="{Binding ElementName=myRichTextBox}"
@@ -31,6 +34,7 @@ Genauso einfach verhält es sich einen Text Hochgestellt oder Tiefgestellt darzu
   <!--on default fontfamily subscript and superscript dont work!!-->
   <FlowDocument FontFamily="Palatino Linotype" FontSize="14"/>
 </RichTextBox>
+```
 
 Die Veränderungen an dem Text funktionieren in zwei Modi:
 
@@ -39,10 +43,13 @@ Die Veränderungen an dem Text funktionieren in zwei Modi:
 
 Einen Text Durchgestrichen (Strikethrough) anzuzeigen ist etwas Komplizierter, da die Klasse EditingCommands keine Eigenschaft ToggleStrikethrough besitzt. Im Internet finde man viele Webseiten die einem Zeigen wie man den Modi 1 Implmentiert:
 
+```xml
 <ToggleButton
   Click="myStrikethroughButtonClicked"
   Content="Strikethrough"/> 
+```
 
+```csharp
 private void myStrikethroughButtonClicked(object sender, RoutedEventArgs e)
 {
   if(myRichTextBox == null) return;
@@ -66,9 +73,11 @@ private void HandleStrikethrouphSelection()
 
   range.ApplyPropertyValue(Inline.TextDecorationsProperty, decoratorCollection);
 }
+```
 
 Eine Lösung um den Modi 2 umzusetzen fand ich bei der Internet-Recherce nicht. Daher habe ich so lange Programmiert bis ich eine gefunden habe. Der Trick ist sich im Button-Click-Eventhandler ein Flag zu setzen (bzw. Rücksetzen). Im RichTextBox-TextChanged-Eventhandler wird dieses Flag gelesen um die TextDecorationCollection entweder neu zu erstellen oder auf TextDecorations.Strikethrough zusetzen.
 
+```xml
 <ToggleButton
   Click="myStrikethroughButtonClicked"
   Content="Strikethrough"/>
@@ -76,25 +85,28 @@ Eine Lösung um den Modi 2 umzusetzen fand ich bei der Internet-Recherce nicht. 
   <!-- on default fontfamily subscript and superscript dont work!!-->
   <FlowDocument FontFamily="Palatino Linotype" FontSize="14"/>
 </RichTextBox>
-\[Flags\]
+```
+
+```csharp
+[Flags]
 private enum RtfFlags
 {
   NONE=0,
   STRIKETHROUGH=1,
   COLORING=2,
 }
-private RtfFlags m\_ActiveFlags = RtfFlags.NONE;
+private RtfFlags m_ActiveFlags = RtfFlags.NONE;
 private void UpdateActiveFlags(RtfFlags expected)
 {
-  if((m\_ActiveFlags & expected) == expected)
-    m\_ActiveFlags &= ~expected; //unset flag
+  if((m_ActiveFlags & expected) == expected)
+    m_ActiveFlags &= ~expected; //unset flag
   else
-    m\_ActiveFlags |= expected; //set flag
+    m_ActiveFlags |= expected; //set flag
 }
 
 private bool IsRtfFlagActive(RtfFlags expected)
 {
-  return (m\_ActiveFlags & expected) == expected;
+  return (m_ActiveFlags & expected) == expected;
 }
 
 private void ApplyPropertyValueToText(int begin, int end, 
@@ -147,3 +159,4 @@ private void myRichTextBoxTextChanged(object sender, TextChangedEventArgs e)
         change.Offset + change.AddedLength);
   }
 }
+```

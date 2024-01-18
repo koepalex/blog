@@ -2,8 +2,9 @@
 title: "Pipe aus eigenen Programmen nutzen"
 date: "2013-10-13"
 categories: 
-  - "c-net"
+  - "dotnet"
 tags: 
+  - "dotnet"
   - "cmd"
   - "pipe"
   - "81301"
@@ -15,7 +16,16 @@ Logisch gesehen Ersetzt der Inhalt der Pipe ein einzelnes Konsolen-Argument. Um 
 
 ### 1
 
-Das Lesen der Eingabedaten aus der Standardeingabe: `string pipedData = Console.In.ReadLine (); if (string.IsNullOrEmpty (pipedData)) { Console.WriteLine ("no piped argument"); } else { dataModel.Input = pipedData; }`
+Das Lesen der Eingabedaten aus der Standardeingabe: 
+```csharp
+string pipedData = Console.In.ReadLine ();
+if (string.IsNullOrEmpty (pipedData)) {
+    Console.WriteLine ("no piped argument");
+}
+else {
+    dataModel.Input = pipedData;
+}
+```
 
 ### 2
 

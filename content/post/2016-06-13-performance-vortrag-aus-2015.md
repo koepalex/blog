@@ -2,8 +2,9 @@
 title: "Performance Vortrag aus 2015"
 date: "2016-06-13"
 categories: 
-  - "c-net"
+  - "dotnet"
 tags: 
+  - "dotnet"
   - "performance"
 ---
 

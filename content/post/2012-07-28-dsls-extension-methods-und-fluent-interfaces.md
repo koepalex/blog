@@ -2,8 +2,9 @@
 title: "DSLs, Extension Methods und Fluent Interfaces"
 date: "2012-07-28"
 categories: 
-  - "c-net"
+  - "dotnet"
 tags: 
+  - "dotnet"
   - "dsl"
   - "extension-methods"
   - "fluent-interfaces"
@@ -21,29 +22,34 @@ Die relevante Information, dass es darum geht, herauszufinden, ob eine Verbindun
 
 Eine einfache Möglichkeit eine DSL mit C# .NET zu realisieren sind Erweiterungsmethoden (extension methods), als Beispiel diene eine Klasse, welche Relationen (Links) zwischen zwei Objekten (wie Datenbankentitäten) darstellt.
 
-> public class Relation : IRelation  
-> {  
->    //...  
->    public DomainObject Target {get; private set; }  
->    public DomainObject Source {get; private set; }  
->    public static IEnumerable<IRelation> GetAllRelations   (DomainObject source) {/\* …\*/ }  
->    //...  
-> }
+```csharp
+public class Relation : IRelation  
+{
+    //...  
+    public DomainObject Target {get; private set; }  
+    public DomainObject Source {get; private set; }  
+    public static IEnumerable<IRelation> GetAllRelations   (DomainObject source)
+    {
+      // ..
+    }  
+    //...  
+}
+```
 
 Um zu wissen, ob ein DomainObject mit einem anderen verlinkt ist, ist die Implementierung einfach:  
 if (Relation.GetAllRelations(obj).Any(rel => rel.Target == otherObject))
 
 Für Entwickler, die keine LINQ-Anweisungen verstehen, ist der Quelltext jedoch nicht so einfach. Eine Extension Method, könnte in diesem Fall sehr zur Verständlichkeit beitragen.
 
-> public static class ExtensionMethods  
-> {  
->     public bool IsLinkedTo  
->        (this DomainObject source, DomainObject target)  
->    {  
->       return Relation.GetAllRelations(source).Any(  
->              rel =>  rel.Target    == target);  
->    }  
-> }
+```csharp
+public static class ExtensionMethods  
+{  
+    public bool IsLinkedTo(this DomainObject, source, DomainObject target)  
+    {  
+        return Relation.GetAllRelations(source).Any( rel =>  rel.Target == target);  
+    }  
+}
+```
 
 Mit dieser Extension Methode sieht man das der Quelltext der Ursprünglichen vereinfacht wurde:
 
@@ -60,42 +66,44 @@ Oder können sie erkennen, welchen Typen die Parameter "l", "p" und "d" besitzen
 
 Eine Fluent Interface Variante könnte wie folgt aussehen:
 
-> Args arg = Args.GetInstance()  
->      .Argument<bool>("l").SetDefault(false)  
->      .Argument<int>("p").SetDefault(42)  
->      .Argument<string>("d").SetDefault("foo")  
->      .Parse(args);
+```csharp
+Args arg = Args.GetInstance()  
+  .Argument<bool>("l").SetDefault(false)  
+  .Argument<int>("p").SetDefault(42)  
+  .Argument<string>("d").SetDefault("foo")  
+  .Parse(args);
+```
 
 Diese Variante ist nicht so kompakt wie die ursprüngliche, dafür enthält sie mehr Informationen (über Typen und Defaultwerte). Die Mächtigkeit zeigen Fluent Interfaces, wenn es darum geht, bestehenden Implementierungen zu erweitern. Egal ob man alle Parameter über ein anderes Zeichen beginnen lassen möchte "-", "--", "/", ob man zusätzliche Hilfe Texte zu den Parametern hinterlegen, ob man eine Validierung (über Minimal- und Maximalwerte) hinzufügen oder eine Aktion auslösen möchte.
 
-> Args arg = Args.GetInstance()  
-> .SetParameterSymbol("—")  
->    .Argument<bool>("l")  
->       .SetDefault(false)  
->       .AddDescription()  
->          .Header("l means Log")  
->          .Text("starting the programm with a verbose logging")  
->          .SetAction()  
->             .WhenValueEqualsTo(true)  
->             .Do (() => {m\_Logger = new VerboseLogger();})  
->    .Argument<int>("p")  
->       .SetDefault(23)  
->       .AddValidation()  
->          .Minimum(7)  
->          .Maximum(42)  
->          .SetAction()  
->             .WhenValueOutsideRange()  
->             .Do((val) =>  
->             {  
->                 Console.WriteLine(Ressource.ErrorCountProcesses);  
->                 m\_NumberOfProcesses = 23;  
->            })  
->            .OtherwiseDo((val) =>  
->           {  
->              m\_NumberOfProcesses = val;  
->           })  
->    .Argument<string>("d")  
->        .SetDefault("foo")  
-> .Parse(args);
+```csharp
+Args arg = Args.GetInstance()  
+  .SetParameterSymbol("—")  
+    .Argument<bool>("l")  
+      .SetDefault(false)  
+      .AddDescription()  
+        .Header("l means Log")  
+        .Text("starting the programm with a verbose logging")  
+      .SetAction()  
+        .WhenValueEqualsTo(true)  
+          .Do (() => {m_Logger = new VerboseLogger();})  
+      .Argument<int>("p")  
+        .SetDefault(23)  
+        .AddValidation()  
+          .Minimum(7)  
+          .Maximum(42)  
+        .SetAction()  
+          .WhenValueOutsideRange()  
+            .Do((val) =>  {  
+              Console.WriteLine(Ressource.ErrorCountProcesses);  
+              m_NumberOfProcesses = 23;  
+            })  
+            .OtherwiseDo((val) =>  {  
+              m_NumberOfProcesses = val;  
+            })  
+        .Argument<string>("d")  
+          .SetDefault("foo")  
+    .Parse(args);
+```
 
 Das letzte Beispiel enthält sehr viel Logik, entscheiden sie selbst ob sie es nicht vielleicht trotzdem als einfach verständlich betrachten.

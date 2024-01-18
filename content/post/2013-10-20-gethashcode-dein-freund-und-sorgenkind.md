@@ -2,8 +2,9 @@
 title: "GetHashCode dein Freund und Sorgenkind"
 date: "2013-10-20"
 categories: 
-  - "c-net"
+  - "dotnet"
 tags: 
+  - "dotnet"
   - "gethashcode"
   - "hash"
   - "performance"
@@ -11,12 +12,20 @@ tags:
 
 Eine wichtige Methode beim Arbeiten im .NET Umfeld ist GetHashCode. Sie gibt einen 32 Bit Integer zurück der das Objekt identifizieren soll. Der Hash-Code beschreibt also die Identität des Objektes (im Gegensatz zur Speicherreferenz auf das Objekt).
 
-Daraus leitet sich die Frage ab _Wann zwei Objekte die selbe Identität besitzen?_ Im Falle einer Object-Relational-Mapper Klasse beispielsweise, wenn die Instanzen der O/R-Mapper Klasse auf ein und die selbe Zeile(n) der selben Tabelle(n) der selben Datenbank(en) verweisen. Klassischer weise durch eine Kette von Primary-Keys. Der Hash-Code ist auch ein Sorgenkind eines Entwicklers da schon hier die Probleme beginnen. Eine einfach Implementierungen könnte sein: `return (tableKey.GetHashCode()+ key1.GetHashCode() + keyN.GetHashCode());` Diese ist jedoch Falsch denn die Addition von unterschiedlichen Summanden kann die gleichen Summe ergeben. Eine verbesserte Implementierung ist: `return string.Concat(tableKey, key1, keyN).GetHashCode();` Jedoch beinhaltet auch diese Implementierung einen unscheinbaren Fehler.
+Daraus leitet sich die Frage ab _Wann zwei Objekte die selbe Identität besitzen?_ Im Falle einer Object-Relational-Mapper Klasse beispielsweise, wenn die Instanzen der O/R-Mapper Klasse auf ein und die selbe Zeile(n) der selben Tabelle(n) der selben Datenbank(en) verweisen. Klassischer weise durch eine Kette von Primary-Keys. Der Hash-Code ist auch ein Sorgenkind eines Entwicklers da schon hier die Probleme beginnen. Eine einfach Implementierungen könnte sein: 
+```csharp
+return (tableKey.GetHashCode()+ key1.GetHashCode() + keyN.GetHashCode());
+```
+Diese ist jedoch Falsch denn die Addition von unterschiedlichen Summanden kann die gleichen Summe ergeben. Eine verbesserte Implementierung ist: `return string.Concat(tableKey, key1, keyN).GetHashCode();` Jedoch beinhaltet auch diese Implementierung einen unscheinbaren Fehler.
 
 - key1: "ab" keyN: "c" ergibt _"abc"_.GetHashCode()
 - key1: "a" keyN "bc" ergibt auch _"abc"_.GetHashCode()
 
-Eine weiter verbesserte Implementierung ist: `return string.Format("{0} : {1} : {2}", tableKey, key1, keyN) .GetHashCode();` Um jedoch einen noch besseren Hash-Code zu berechnen müsste man die Hash-Code der einzelnen Felder generieren und diese mittels einer Hash-Funktion verarbeiten. Beispiele für Hash-Funktionen sind:
+Eine weiter verbesserte Implementierung ist: 
+```csharp
+return string.Format("{0} : {1} : {2}", tableKey, key1, keyN) .GetHashCode();
+```
+Um jedoch einen noch besseren Hash-Code zu berechnen müsste man die Hash-Code der einzelnen Felder generieren und diese mittels einer Hash-Funktion verarbeiten. Beispiele für Hash-Funktionen sind:
 
 1. [Jenkins](http://en.wikipedia.org/wiki/Jenkins_hash_function)
 2. [Murmur](http://en.wikipedia.org/wiki/Murmurhash)

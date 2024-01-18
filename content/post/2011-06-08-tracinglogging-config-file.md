@@ -2,10 +2,10 @@
 title: "Tracing/Logging und die Config-Datei"
 date: "2011-06-08"
 categories: 
-  - "c-net"
+  - "dotnet"
 tags: 
-  - "net"
-  - "c"
+  - "dotnet"
+  - "c#"
   - "config"
   - "trace"
 ---
@@ -27,6 +27,7 @@ Damit kann man ohne neu kompilieren des Assemblies einfach den Ausgabeort des Tr
 
 Eine Config-Datei ist eine XML-Datei mit dem Namen des Assemblies und der Extension .config z.B. MeinBeispielApp.exe.config für das Programm MeinBeispielApp.exe. Visual Studio erkennt die Datei-Extension und bietet eine entsprechende Intellisense an. In einem Beispiel sollen die zwischen Ergebnisse einer Berechnung geloggt werden, der DefaultTraceListener schreibt diese Daten in den Debug-Stream des Betriebssystems.
 
+```csharp
 Class Program
 {
 	static void Main(string\[\] args)
@@ -55,9 +56,11 @@ class Worker
 		return	result;
 	}
 }
+```
 
 Wenn das Programm auf einem anderen Rechner ausgeführt wird (z.B. beim Kunden), währe ist es einfacher den Trace in einer Datei zu haben anstatt Remote zu Debuggen. Die Datei kann anschließend dem Entwickler zugesand werden kann. Um dies zu erreichen, dazu muss man in der Config-Datei nur etwas eintragen:
 
+```xml
 <?xmlversion="1.0"encoding="utf-8"?>
 <configuration>
   <system.diagnostics>
@@ -69,9 +72,11 @@ Wenn das Programm auf einem anderen Rechner ausgeführt wird (z.B. beim Kunden),
     </trace>
   </system.diagnostics>
 </configuration>
+```
 
 Die Config-Datei muss sich im selben Ordner wie das Assembly befinden. Tracing im kostet viel Zeit, die Methode Calculate benötigt ~ 80000000 Ticks zur Berechnung des Ergebnis mit aktiven Trace, aber nur ~215000 Ticks ohne. Daher sollte man darüber nachdenken ob man (wenn man die Software freigibt) nicht eine Config-Datei beilegt, welche alle TraceListener ausschaltet und diese nur in Problemfällen über die Config-Datei einschalten lässt. Eine Config-Datei welche alle Listener entfernt (auch welche Programmatisch z.B. via Trace.Listeners.Add(newXmlWriterTraceListener(@"C:\\log.xml")); hinzugefügt wurden) sieht z.B. so aus:
 
+```xml
 <?xmlversion="1.0"encoding="utf-8"?>
   <configuration>
     <system.diagnostics>
@@ -82,5 +87,6 @@ Die Config-Datei muss sich im selben Ordner wie das Assembly befinden. Tracing i
       </trace>
   </system.diagnostics>
 </configuration>
+```
 
 Wer eine schöne Ausgabe sehen möchte, die Logs eventuell auf einen Webserver ablegen möchte oder verschiedene Log-Level (Info, Warning, Error) benutzen dem seien die oben erwähnten professionellen Log Tools empfohlen. Über die Config-Datei lassen sich noch viel mehr Einstellungen vornehmen, es lohnt sich damit zu Beschäftigen. Die erste Anlaufstelle für Informationen ist die [MSDN](http://msdn.microsoft.com/en-us/library/1fk1t1t0(v=VS.90).aspx).

@@ -2,7 +2,7 @@
 title: "Muss es immer die 100% Lösung sein?"
 date: "2013-10-14"
 categories: 
-  - "c-net"
+  - "miscellaneous"
 ---
 
 Ich behaupte einfach mal, dass man sich in der Softwareentwicklung schnell in zu aufwendigen Lösungen verliert. Zumindest mir geht es regelmäßig so, ich habe einiges an Software entwickelt und Artikel geschrieben die nie veröffentlicht wurden (obwohl sie dafür gedacht waren). Der Grund für die nicht Veröffentlichung war, dass sie meiner Meinung nach nicht komplett waren oder meinen eigenen Ansprüchen nicht genügten.

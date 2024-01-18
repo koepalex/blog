@@ -2,7 +2,7 @@
 title: "Eindruck und Gedanken zu Mac OS X"
 date: "2013-08-24"
 categories: 
-  - "macos"
+  - "miscellaneous"
 tags: 
   - "eindruck"
   - "mac"

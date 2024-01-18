@@ -2,7 +2,7 @@
 title: "AutoHotkey"
 date: "2014-01-05"
 categories: 
-  - "allgemein"
+  - "miscellaneous"
 tags: 
   - "autohotkey"
   - "markdown"

@@ -2,8 +2,9 @@
 title: "Neues vom GC in .NET 4.0 und 4.5"
 date: "2013-10-21"
 categories: 
-  - "c-net"
+  - "dotnet"
 tags: 
+  - "dotnet"
   - "gc"
   - "largeobjectheapcompactionmode"
   - "loh"

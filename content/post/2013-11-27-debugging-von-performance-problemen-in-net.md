@@ -2,8 +2,9 @@
 title: "Debugging von Performance Problemen in .NET"
 date: "2013-11-27"
 categories: 
-  - "c-net"
+  - "dotnet"
 tags: 
+  - "dotnet"
   - "perfvew"
   - "sos"
   - "sosex"
@@ -25,11 +26,11 @@ Microsoft liefert die sos.dll mit dem .NET Framework aus. Sie ermöglicht den Wi
 
 Auf der MSDN Webseite befindet sich die [Befehlsreferenz](http://msdn.microsoft.com/de-de/library/bb190764.aspx).
 
-### WinDbg mit „[_SOS EX_tension](http://www.stevestechspot.com)“ Erweiterung
+### WinDbg mit „[SOSEX tension](http://www.stevestechspot.com)“ Erweiterung
 
 Die von Steve Johnson geschriebene sosex.dll bietet viele nützliche Erweiterungen die dass managed Code debugging im WinDbg deutlich vereinfachen. Beispielsweise kann die SOSEX mittels Befehl `!bhi` einen HeapIndex erstellen lassen. Dieser Index enthält alle benötigten Informationen über die Objekte auf dem Heap. Um anschließend z.B. alle GC-Roots eines Objektes zu finden (`!mroot <adr> -all`) muss die SOSEX nicht das gesamte Speicherabbild analysieren sondern nur den HeapIndex. Dieses Vorgehen funktioniert deutlich schneller als die Alternative der SOS (`!gcroot -all <adr>`), welche jedes mal das Speicherabbild durchsucht.
 
-Eine andere Eigenschaft ist das die SOSEX [.prefer\_dml 1](http://www.wintellect.com/blogs/jrobbins/a-cool-windbg-sos-hidden-feature) verwendet d.h. dass Links in die Ausgabe des WinDbg eingebettet werden. Dadurch wird einem häufig das kopieren bzw. abtippen von teilen der Ausgabe erspart.
+Eine andere Eigenschaft ist das die SOSEX [.prefer_dml 1](http://www.wintellect.com/blogs/jrobbins/a-cool-windbg-sos-hidden-feature) verwendet d.h. dass Links in die Ausgabe des WinDbg eingebettet werden. Dadurch wird einem häufig das kopieren bzw. abtippen von teilen der Ausgabe erspart.
 
 Weitere Funktionalitäten der SOSEX sind
 

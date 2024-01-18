@@ -2,8 +2,9 @@
 title: "Inversion Of Control(-Container), Service Locator und Dependency Injection"
 date: "2012-06-08"
 categories: 
-  - "c-net"
+  - "dotnet"
 tags: 
+  - "dotnet"
   - "dependency-injection"
   - "di"
   - "inversion-of-control"
@@ -54,7 +55,15 @@ IOC-Container werden auch als Dependency Injection Container bezeichnet. Ihr Auf
 
 Stellen Sie sich einen AVL-Suchbaum vor, dieser arbeitet mit AVL-Knoten, die ein Interface erfüllen wie:
 
-public interface IAvlNode<T, K> { T Key{get; set;} K Value {get; set;} IAvlNode<T, K> LeftChild {get; set;} IAvlNode<T, K> RightChild {get; set;} }
+```csharp
+public interface IAvlNode<T, K> 
+{ 
+  T Key{get; set;} 
+  K Value {get; set;} 
+  IAvlNode<T, K> LeftChild {get; set;} 
+  IAvlNode<T, K> RightChild {get; set;}
+}
+```
 
 Nun sollen Elemente in den AVL-Suchbaum eingefügt werden, dass bedeutet der Baum muss, einen neuen Knoten erstellen und ihn in den Baum einfügen und ggf. sich neu gewichten. Hier liegt das Problem, der Baum erstellt den Knoten. Das sorgt für eine hohe Kopplung zwischen Baum und Knoten. Wenn die Kopplung nicht existieren würde, könnte im Baum Knoten geben, welche Ihre Daten sofort auf Festplatte serialisieren, oder Knoten die Ihre Daten remote auf Servern hinterlegen oder anderes erledigen. In einen fragwürdigen Design würde man der Baum die Logik enthalten, wann welche Art von Knoten zu erstellen ist. Den entsprechenden Knoten über Dependency Injektion in die Baum-Klasse zuübergeben, ist auch nicht praktikabel z.B. wenn der Baum, dass Standard interface IDictionary<T,K> erfüllen soll. Für dieses Problem stellt der IOC-Container eine Lösung da, er wird mit den Abhängigkeiten befüllt. Und der Baum kann an dem Container mittels Resolve<IAvlNode>(); einen Knoten erstellen lassen und damit Arbeiten.
 
@@ -62,21 +71,15 @@ Es gibt eine lange Liste an bekannten IOC-Containern (siehe [http://www.hanselma
 
 Besonders möchte ich auf dieses Video, in welchem ein einfacher IOC-Container in 15min entwickelt wird, hinweisen: [https://www.youtube.com/watch?v=cfvTfU5RK8Q](https://www.youtube.com/watch?v=cfvTfU5RK8Q)
 
- 
-
 _**Warum das Ganze?**_
 
 - lose Kopplung (kein direktes Anlegen von Objekten)
 - erhöhte Testbarkeit (es werden richtige Unit-Tests möglich)
 - Erhöhung der Wiederverwendbarkeit (siehe Baum Beispiel)
 
- 
-
 **_Wie kommt meine Klasse zu dem IOC-Container?_**
 
 Die Antwort ist ganz klar Dependency Injection oder Service Locator.
-
- 
 
 **_Welche Nachteile ergeben sich durch Verwendung von IOC(-Container), DI und SL?_**
 

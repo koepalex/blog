@@ -2,8 +2,9 @@
 title: "Ermitteln des PID (Processidentifier) des Vaterprozesses"
 date: "2012-10-14"
 categories: 
-  - "c-net"
+  - "dotnet"
 tags: 
+  - "dotnet"
   - "ntdll"
   - "parent"
   - "performancecounter"
@@ -15,17 +16,18 @@ In manchen Fällen ist es notwendig heraus zu finden, welches der Vaterprozess e
 
 Die häufigste Lösung ist die Verwendung von **Performancecountern**.
 
-> var process = FindProcess();  
-> using (var pC = new PerformanceCounter(
-> 
->     "Process",  
->     "Creating Process ID",  
->     string.Format("{0}#{1}", process.ProcessName, 1),    
->     process.MachineName))  
-> {  
->        int pid = (int)pC.NextValue();  
->        Console.WriteLine("parent pid = {0}", pid);  
-> }
+```csharp
+var process = FindProcess();  
+using (var pC = new PerformanceCounter(
+    "Process",  
+    "Creating Process ID",  
+    string.Format("{0}#{1}", process.ProcessName, 1),    
+    process.MachineName))  
+{  
+    int pid = (int)pC.NextValue();  
+    Console.WriteLine("parent pid = {0}", pid);  
+}
+```
 
 Die Verwendung von Performancecountern im Allgemeinen kann zwei mögliche Nachteile haben:
 
@@ -38,18 +40,18 @@ Von der Verwendung der Methode ist jedoch aus heutiger Sicht abzuraten, da Micro
 
 Die (von mir) empfohlene Variante ist die Verwendung der **Windows Management Instrumentation** (kurz WMI, vgl. [http://msdn.microsoft.com/en-us/library/aa384642(v=vs.85).aspx](http://msdn.microsoft.com/en-us/library/aa384642(v=vs.85).aspx)). Es handelt sich hierbei um eine Implementierung der Web Based Enterprise Management-Spezifikation. Die Spezifikation enthält eine Menge von Funktionen zum Administrieren und zur Fernwartung von Computern, wobei sie Hardware und Betriebssystem unabhängig ist. WMI lässt sich auch lokal auf dem Computer verwenden, das auslesen der PID des Vaterprozesses sieht wie folgt aus:
 
-> var process = FindProcess();  
-> var query = string.Format("SELECT ParentProcessId FROM Win32\_Process WHERE ProcessId = {0}", process.Id);  
-> using (var mos = new ManagementObjectSearcher(query))  
-> {  
->     var enumerator = mos.Get().GetEnumerator();  
->     if(enumerator.MoveNext())  
->     {  
->         int pid = (int)((uint)enumerator.Current    
->            \["ParentProcessId"\]);  
->         Console.WriteLine("parent pid = {0}", pid);  
->     }  
->     else  
->         throw new InvalidOperationException("can't read   
->            parentProcessId by WMI");  
-> }
+```csharp
+var process = FindProcess();  
+var query = string.Format("SELECT ParentProcessId FROM Win32\_Process WHERE ProcessId = {0}", process.Id);  
+using (var mos = new ManagementObjectSearcher(query))  
+{  
+    var enumerator = mos.Get().GetEnumerator();  
+    if(enumerator.MoveNext())  
+    {  
+        int pid = (int)((uint)enumerator.Current    ["ParentProcessId"]);  
+        Console.WriteLine("parent pid = {0}", pid);  
+    }  
+    else  
+      throw new InvalidOperationException("can't read parentProcessId by WMI");  
+}
+```
