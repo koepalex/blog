@@ -34,7 +34,7 @@ home = ["HTML", "RSS"]
 
     [[params.addtional_menus]]
         title =  "ABOUT"
-        href =  "/blog/about/"
+        href =  "/about/"
         
     [params.style]
         darkestColor = "#315659"

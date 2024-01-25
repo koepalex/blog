@@ -11,7 +11,7 @@ I'm an software enthusiast which follows the paradigma of lifelong learning. Exc
 
 ## Short Biography
 
-| Company | From | To | Location | Highest Position | Mentional Product |
+| Company | From | To | Location | Highest Position | Exemplary Projects |
 | --- | --- | --- | --- | --- | --- |
 | Siemens AG | 2007 | 2018 | Germany | Chief Architect | TIA Portal Hardware Configuration and Networks |
 | Siemens Information Systems Limited | 2019 | 2019 | India | Chief Architect | |
