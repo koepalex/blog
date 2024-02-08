@@ -1,4 +1,4 @@
-baseURL = 'https://alexander-koepke.de/'
+baseURL = 'https://www.alexander-koepke.de/'
 languageCode = 'de-de'
 #title = 'Blog von Alexander Köpke'
 theme = 'hugo-theme-cleanwhite'
