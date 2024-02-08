@@ -1,4 +1,4 @@
-baseURL = 'https://www.alexander-koepke.de/'
+baseURL = 'https://alexander-koepke.de/'
 languageCode = 'de-de'
 #title = 'Blog von Alexander Köpke'
 theme = 'hugo-theme-cleanwhite'
@@ -8,44 +8,44 @@ home = ["HTML", "RSS"]
 
 
 [params]
-    author = 'Alexander Köpke'
-    description = 'Technical articles, the Universe and the all the rest'
+author = 'Alexander Köpke'
+description = 'Technical articles, the Universe and the all the rest'
 
-    header_image = "koepalex.logo.gif"
+header_image = "koepalex.logo.gif"
 
-    reward = false 
-    friends = false
-    bookmarks = false
-    about_me = true
-    algolia_search = false
-    sidebar_about_description = "Software Architect in the Agile Age, with focus on Industrial IoT"
-    sidebar_avatar = "avatar.jpg"  
-    image_404 = "404.jpg"
-    title_404 = "there be dragons 🐉"
+reward = false
+friends = false
+bookmarks = false
+about_me = true
+algolia_search = false
+sidebar_about_description = "Software Architect in the Agile Age, with focus on Industrial IoT"
+sidebar_avatar = "avatar.jpg"
+image_404 = "404.jpg"
+title_404 = "there be dragons 🐉"
 
-    [params.social]
-        rss = true
-        email = "this-is@alexander-koepke.de"
-        github = "https://github.com/koepalex"
-        twitter = "https://twitter.com/koepalex"
-        linkedin = "https://www.linkedin.com/in/alexander-köpke-3222a21b7/"
-        stackoverflow = "https://stackoverflow.com/users/9474615/koepalex"
-        mastodon = "@koepalex@dotnet.social"
+[params.social]
+rss = true
+email = "this-is@alexander-koepke.de"
+github = "https://github.com/koepalex"
+twitter = "https://twitter.com/koepalex"
+linkedin = "https://www.linkedin.com/in/alexander-köpke-3222a21b7/"
+stackoverflow = "https://stackoverflow.com/users/9474615/koepalex"
+mastodon = "@koepalex@dotnet.social"
 
-    [[params.addtional_menus]]
-        title =  "ABOUT"
-        href =  "/about/"
-        
-    [params.style]
-        darkestColor = "#315659"
-        darkColor = "#253031"
-        lightColor = "#96a879"
-        lightestColor = "#fff"
-        primaryColor = "#dad865"
-    
-    [markup]
-        [markup.tableOfContents]
-            endLevel = 2
-            startLevel = 1
-        [markup.highlight]
-            style = "dracula"
+[[params.addtional_menus]]
+title = "ABOUT"
+href = "/about/"
+
+[params.style]
+darkestColor = "#315659"
+darkColor = "#253031"
+lightColor = "#96a879"
+lightestColor = "#fff"
+primaryColor = "#dad865"
+
+[markup]
+[markup.tableOfContents]
+endLevel = 2
+startLevel = 1
+[markup.highlight]
+style = "dracula"
