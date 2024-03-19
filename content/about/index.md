@@ -27,8 +27,8 @@ I'm an software enthusiast which follows the paradigma of lifelong learning. Exc
 
 | Title | Type | Publisher | 
 | --- | --- | --- | 
-| [Insights Into Connecting Industrial IoT Assets](/static/publications/OMP-IIoT-Connectivity-White-Paper-20201207.pdf) | Whitepaper | Open Manufacturing Platform |
-| [Edge Computing in the Context of Open Manufacturing](/static/publications/blog/OMP-IIoT-Connectivity-Edge-Computing-20210701.pdf) | Whitepaper | Open Manufacturing Platform | 
+| [Insights Into Connecting Industrial IoT Assets](/publications/OMP-IIoT-Connectivity-White-Paper-20201207.pdf) | Whitepaper | Open Manufacturing Platform |
+| [Edge Computing in the Context of Open Manufacturing](/publications/OMP-IIoT-Connectivity-Edge-Computing-20210701.pdf) | Whitepaper | Open Manufacturing Platform | 
 | [Details of the Asset Administration Shell - Part 1](https://www.plattform-i40.de/IP/Redaktion/EN/Downloads/Publikation/Details_of_the_Asset_Administration_Shell_Part1_V3.html)| Specification | Platform Industry 4.0 |
 | [Details of the Asset Administration Shell - Part 2](https://www.plattform-i40.de/IP/Redaktion/EN/Downloads/Publikation/Details_of_the_Asset_Administration_Shell_Part2_V1.html) | Specification | Platform Industry 4.0 |
 
