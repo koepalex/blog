@@ -1,5 +1,5 @@
 ---
-date: "2024-01-15"
+date: "2024-04-05"
 tags: 
   - "about"
 layout: page
@@ -21,7 +21,8 @@ I'm an software enthusiast which follows the paradigma of lifelong learning. Exc
 
 | Orgranization | Repositories | Role |
 | --- | --- | --- |
-| OPC Foundation | [UA-.NETStandard](https://github.com/OPCFoundation/UA-.NETStandard), [UA-.NETStandard-Samples](https://github.com/OPCFoundation/UA-.NETStandard-Samples) | Reviewer, Contributor
+| OPC Foundation | [UA-.NETStandard](https://github.com/OPCFoundation/UA-.NETStandard), [UA-.NETStandard-Samples](https://github.com/OPCFoundation/UA-.NETStandard-Samples) | Reviewer, Contributor |
+| CloudEvents | [CloudEvents Spec](https://github.com/cloudevents/spec/) | Author of the extension for OPC UA |
 
 ## Publications
 
