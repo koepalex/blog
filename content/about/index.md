@@ -9,6 +9,8 @@ layout: page
 
 I'm an software enthusiast which follows the paradigma of lifelong learning. Except from developing software I like to spend time with my kids, go swimming, listen to audiobooks/podcasts or play board-games, rollplay-games and computer-games with friends. 
 
+Opinions are my own and not necessarily the point of view of my employer. 
+
 ## Short Biography
 
 | Company | From | To | Location | Highest Position | Exemplary Projects |
