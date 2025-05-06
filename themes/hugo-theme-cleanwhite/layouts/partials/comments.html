@@ -5,16 +5,16 @@
 <script src="{{ "js/iDisqus.js" | relURL }}"></script>
 <script>
 var disq = new iDisqus('disqus-comment', {
-    forum: '{{ .Site.DisqusShortname}}',
+    forum: '{{ .Site.Params.DisqusShortname}}',
     api: '{{ .Site.Params.disqus_proxy }}',
-	site: '{{ .Site.Params.disqus_site }}',
+site: '{{ .Site.Params.disqus_site }}',
     mode: 1,
     timeout: 5000,
     init: true,
     emojiPreview: true
 });
 </script>
-{{ else if .Site.DisqusShortname }}
+{{ else if .Site.Params.DisqusShortname }}
 <!-- disqus 评论框 end -->
 <div id="disqus-comment"></div>
 {{ template "_internal/disqus.html" . }}

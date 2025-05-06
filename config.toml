@@ -12,6 +12,8 @@ author = 'Alexander Köpke'
 description = 'Technical articles, the Universe and the all the rest'
 
 header_image = "koepalex.logo.gif"
+GoogleAnalytics = false
+
 
 reward = false
 friends = false
