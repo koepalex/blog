@@ -1,3 +1,123 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>About on</title><link>https://www.alexander-koepke.de/tags/about/</link><description>Recent content in About on</description><generator>Hugo</generator><language>de-de</language><lastBuildDate>Fri, 05 Apr 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://www.alexander-koepke.de/tags/about/index.xml" rel="self" type="application/rss+xml"/><item><title/><link>https://www.alexander-koepke.de/about/</link><pubDate>Fri, 05 Apr 2024 00:00:00 +0000</pubDate><guid>https://www.alexander-koepke.de/about/</guid><description>About Me I&amp;rsquo;m an software enthusiast which follows the paradigma of lifelong learning. Except from developing software I like to spend time with my kids, go swimming, listen to audiobooks/podcasts or play board-games, rollplay-games and computer-games with friends.
-Opinions are my own and not necessarily the point of view of my employer.
-Short Biography Company From To Location Highest Position Exemplary Projects Siemens AG 2007 2018 Germany Chief Architect TIA Portal Hardware Configuration and Networks Siemens Information Systems Limited 2019 2019 India Chief Architect Microsoft GmbH 2020 Present Germany Prinicipal Software Engineer OPC Publisher, Azure IoT Operations Open Source Engagement Orgranization Repositories Role OPC Foundation UA-.</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>About on</title><link>https://www.alexander-koepke.de/tags/about/</link><description>Recent content in About on</description><generator>Hugo</generator><language>de-de</language><lastBuildDate>Wed, 19 Mar 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://www.alexander-koepke.de/tags/about/index.xml" rel="self" type="application/rss+xml"/><item><title/><link>https://www.alexander-koepke.de/about/</link><pubDate>Wed, 19 Mar 2025 00:00:00 +0000</pubDate><guid>https://www.alexander-koepke.de/about/</guid><description>&lt;h2 id="about-me">About Me&lt;/h2>
+&lt;p>I&amp;rsquo;m an software enthusiast which follows the paradigma of lifelong learning. Except from developing software I like to spend time with my kids, go swimming, listen to audiobooks/podcasts or play board-games, roleplay-games and computer-games with friends.&lt;/p>
+&lt;p>Opinions are my own and not necessarily the point of view of my employer.&lt;/p>
+&lt;h2 id="short-biography">Short Biography&lt;/h2>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th>Company&lt;/th>
+ &lt;th>From&lt;/th>
+ &lt;th>To&lt;/th>
+ &lt;th>Location&lt;/th>
+ &lt;th>Highest Position&lt;/th>
+ &lt;th>Exemplary Projects&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td>Siemens AG&lt;/td>
+ &lt;td>2007&lt;/td>
+ &lt;td>2018&lt;/td>
+ &lt;td>Germany&lt;/td>
+ &lt;td>Chief Architect&lt;/td>
+ &lt;td>TIA Portal Hardware Configuration and Networks&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td>Siemens Information Systems Limited&lt;/td>
+ &lt;td>2019&lt;/td>
+ &lt;td>2019&lt;/td>
+ &lt;td>India&lt;/td>
+ &lt;td>Chief Architect&lt;/td>
+ &lt;td>&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td>Microsoft GmbH&lt;/td>
+ &lt;td>2020&lt;/td>
+ &lt;td>2024&lt;/td>
+ &lt;td>Germany&lt;/td>
+ &lt;td>Prinicipal Software Engineer&lt;/td>
+ &lt;td>OPC Publisher, Azure IoT Operations&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td>Microsoft GmbH&lt;/td>
+ &lt;td>2024&lt;/td>
+ &lt;td>Present&lt;/td>
+ &lt;td>Germany&lt;/td>
+ &lt;td>OPC UA Lead Architect (Edge &amp;amp; Platform)&lt;/td>
+ &lt;td>Spearheading the adaptive cloud schema integration from shopfloor to data platform&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;h2 id="open-source-engagement">Open Source Engagement&lt;/h2>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th>Orgranization&lt;/th>
+ &lt;th>Repositories&lt;/th>
+ &lt;th>Role&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td>OPC Foundation&lt;/td>
+ &lt;td>&lt;a href="https://github.com/OPCFoundation/UA-.NETStandard">UA-.NETStandard&lt;/a>, &lt;a href="https://github.com/OPCFoundation/UA-.NETStandard-Samples">UA-.NETStandard-Samples&lt;/a>&lt;/td>
+ &lt;td>Reviewer, Contributor&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td>CloudEvents&lt;/td>
+ &lt;td>&lt;a href="https://github.com/cloudevents/spec/">CloudEvents Spec&lt;/a>&lt;/td>
+ &lt;td>Author of the extension for OPC UA&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;h2 id="publications">Publications&lt;/h2>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th>Title&lt;/th>
+ &lt;th>Type&lt;/th>
+ &lt;th>Publisher&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td>&lt;a href="https://www.alexander-koepke.de/publications/OMP-IIoT-Connectivity-White-Paper-20201207.pdf">Insights Into Connecting Industrial IoT Assets&lt;/a>&lt;/td>
+ &lt;td>Whitepaper&lt;/td>
+ &lt;td>Open Manufacturing Platform&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td>&lt;a href="https://www.alexander-koepke.de/publications/OMP-IIoT-Connectivity-Edge-Computing-20210701.pdf">Edge Computing in the Context of Open Manufacturing&lt;/a>&lt;/td>
+ &lt;td>Whitepaper&lt;/td>
+ &lt;td>Open Manufacturing Platform&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td>&lt;a href="https://www.plattform-i40.de/IP/Redaktion/EN/Downloads/Publikation/Details_of_the_Asset_Administration_Shell_Part1_V3.html">Details of the Asset Administration Shell - Part 1&lt;/a>&lt;/td>
+ &lt;td>Specification&lt;/td>
+ &lt;td>Platform Industry 4.0&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td>&lt;a href="https://www.plattform-i40.de/IP/Redaktion/EN/Downloads/Publikation/Details_of_the_Asset_Administration_Shell_Part2_V1.html">Details of the Asset Administration Shell - Part 2&lt;/a>&lt;/td>
+ &lt;td>Specification&lt;/td>
+ &lt;td>Platform Industry 4.0&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;h2 id="patents">Patents&lt;/h2>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th>Title&lt;/th>
+ &lt;th>ID&lt;/th>
+ &lt;th>Date&lt;/th>
+ &lt;th>Status&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td>&lt;a href="https://register.epo.org/application?number=EP19185732">Method for updating Software for an automation system, control device for an automation system and &lt;/a>&lt;/td>
+ &lt;td>P19185732&lt;/td>
+ &lt;td>11.07.2019&lt;/td>
+ &lt;td>withdrawn&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table></description></item></channel></rss>
