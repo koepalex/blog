@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Companion Specifications on</title><link>https://www.alexander-koepke.de/tags/companion-specifications/</link><description>Recent content in Companion Specifications on</description><generator>Hugo</generator><language>de-de</language><lastBuildDate>Fri, 17 Jul 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://www.alexander-koepke.de/tags/companion-specifications/index.xml" rel="self" type="application/rss+xml"/><item><title>Validate OPC UA Address Spaces Before Integration</title><link>https://www.alexander-koepke.de/post/2026-07-17_opcua-address-space-checker/</link><pubDate>Fri, 17 Jul 2026 00:00:00 +0000</pubDate><guid>https://www.alexander-koepke.de/post/2026-07-17_opcua-address-space-checker/</guid><description>&lt;h1 id="validate-opc-ua-address-spaces-before-integration"&gt;Validate OPC UA Address Spaces Before Integration&lt;/h1&gt;
+&lt;p&gt;An OPC UA server can be reachable, browsable, and able to return values while its
+address space is still modeled incorrectly. A mandatory component may be missing,
+a Variable may use the wrong DataType, or a node may appear at the wrong place in
+the hierarchy. These problems are easy to overlook in a client browser, but they
+often surface later when another application relies on the information model
+instead of only reading individual NodeIds.&lt;/p&gt;</description></item></channel></rss>
